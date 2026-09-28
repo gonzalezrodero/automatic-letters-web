@@ -12,9 +12,12 @@ export function SettingsPage() {
   useEffect(() => {
     setPrompt(tenant.systemPrompt)
     setUrl(tenant.privacyPolicyUrl)
-    setNotice(null)
     setError(null)
   }, [tenant.id, tenant.systemPrompt, tenant.privacyPolicyUrl])
+
+  useEffect(() => {
+    setNotice(null)
+  }, [tenant.id])
 
   const dirty = prompt !== tenant.systemPrompt || url !== tenant.privacyPolicyUrl
 
@@ -68,7 +71,10 @@ export function SettingsPage() {
             <span className="mb-1.5 block text-sm font-medium">Persona · system prompt</span>
             <textarea
               value={prompt}
-              onChange={(event) => setPrompt(event.target.value)}
+              onChange={(event) => {
+                setPrompt(event.target.value)
+                setNotice(null)
+              }}
               rows={16}
               className="w-full resize-y rounded-3xl border border-line bg-card px-4 py-3 leading-relaxed outline-none focus:border-moss"
             />
@@ -79,7 +85,10 @@ export function SettingsPage() {
             <span className="mb-1.5 block text-sm font-medium">URL de la política de privacidad</span>
             <input
               value={url}
-              onChange={(event) => setUrl(event.target.value)}
+              onChange={(event) => {
+                setUrl(event.target.value)
+                setNotice(null)
+              }}
               className="w-full rounded-2xl border border-line bg-card px-4 py-3 outline-none focus:border-moss"
               inputMode="url"
             />
