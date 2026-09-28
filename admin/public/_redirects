@@ -1,0 +1,2 @@
+# Cloudflare Pages, when this app is the project root (subdomain deploy, VITE_BASE=/).
+/*    /index.html   200

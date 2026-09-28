@@ -1,0 +1,53 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Outfit', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Fraunces', ui-serif, Georgia, serif;
+  --color-ink: #14241c;
+  --color-ink-soft: #5c6d63;
+  --color-paper: #f3efe6;
+  --color-card: #fffdf8;
+  --color-line: #e4dccb;
+  --color-moss: #0f7a45;
+  --color-moss-deep: #0b5c34;
+  --color-foam: #e6f6ec;
+  --color-sand: #efe4d2;
+  --color-bot: #d8f5cc;
+  --color-danger: #9f2d2d;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+::selection {
+  background: #cfead9;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #d5ccbc transparent;
+}
+
+.chat-canvas {
+  background-color: #efe6d8;
+  background-image: radial-gradient(rgba(20, 36, 28, 0.045) 1.1px, transparent 1.1px);
+  background-size: 16px 16px;
+}
+
+.bubble-in {
+  border-radius: 18px 18px 18px 5px;
+}
+
+.bubble-out {
+  border-radius: 18px 18px 5px 18px;
+}
