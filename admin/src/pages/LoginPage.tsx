@@ -1,18 +1,27 @@
 import { useState, type FormEvent } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
-import { COGNITO_AUTHORIZE_TEMPLATE, cognitoAuthorizeUrl, cognitoRedirectUri } from '../auth/cognito'
+import { COGNITO_AUTHORIZE_TEMPLATE, cognitoRedirectUri, startCognitoLogin } from '../auth/cognito'
+import { safeInternalPath } from '../lib/safeUrl'
 import { useAuth } from '../auth/AuthContext'
 import { Logo } from '../components/Logo'
 
 export function LoginPage() {
-  const { session, login, accounts } = useAuth()
+  const { session, ready, login, accounts } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const from = (location.state as { from?: string } | null)?.from ?? '/'
+  const from = safeInternalPath((location.state as { from?: unknown } | null)?.from)
   const [email, setEmail] = useState('admin@core-webhook.eu')
   const [password, setPassword] = useState('demo')
   const [error, setError] = useState<string | null>(null)
   const [showCognito, setShowCognito] = useState(false)
+
+  if (!ready) {
+    return (
+      <div className="grid min-h-dvh place-items-center bg-paper">
+        <p className="text-sm text-ink-soft">Comprobando la sesión…</p>
+      </div>
+    )
+  }
 
   if (session) return <Navigate to={from} replace />
 
@@ -26,13 +35,18 @@ export function LoginPage() {
     navigate(from, { replace: true })
   }
 
-  function onCognito() {
-    const url = cognitoAuthorizeUrl()
-    if (url) {
+  async function onCognito() {
+    try {
+      const url = await startCognitoLogin()
+      if (!url) {
+        setShowCognito(true)
+        return
+      }
       window.location.assign(url)
-      return
+    } catch (reason) {
+      console.error(reason)
+      setError('No se pudo iniciar el acceso con Cognito.')
     }
-    setShowCognito(true)
   }
 
   return (
@@ -119,10 +133,11 @@ export function LoginPage() {
               <p className="mt-2 text-ink-soft">
                 Con <code className="text-ink">VITE_COGNITO_DOMAIN</code> y{' '}
                 <code className="text-ink">VITE_COGNITO_CLIENT_ID</code>, este botón redirige a{' '}
-                <code className="text-ink">/oauth2/authorize</code>. El callback previsto es{' '}
-                <code className="break-all text-ink">{cognitoRedirectUri()}</code>. El API .NET
-                intercambia el <code className="text-ink">code</code>; el grupo{' '}
-                <code className="text-ink">admin</code> es superadmin y cada otro grupo es el id del tenant.
+                <code className="text-ink">/oauth2/authorize</code> con <code className="text-ink">state</code> y
+                PKCE (<code className="text-ink">S256</code>). El callback es{' '}
+                <code className="break-all text-ink">{cognitoRedirectUri()}</code>. El API .NET canjea el código.
+                Si el token trae el grupo <code className="text-ink">admin</code>, esa cuenta es superadmin aunque
+                también tenga un grupo de tenant.
               </p>
               <p className="mt-3 break-all rounded-xl bg-card px-3 py-2 font-mono text-[11px] text-ink-soft">
                 {COGNITO_AUTHORIZE_TEMPLATE}

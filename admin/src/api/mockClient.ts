@@ -1,4 +1,5 @@
 import { SEED_VERSION, seedDatabase, type DemoDatabase } from '../data/seed'
+import { safeNavigationUrl } from '../lib/safeUrl'
 import { activityTime, maskPhone } from '../lib/format'
 import { buildDashboard, inDateRange } from '../lib/stats'
 import type { AdminApi, Conversation, ConversationQuery, KnowledgeDocument, TenantProfile } from './types'
@@ -35,8 +36,13 @@ function mimeFromName(name: string, type: string): KnowledgeDocument['mime'] | n
   return null
 }
 
-function matchesQuery(conversation: Conversation, query: ConversationQuery): boolean {
-  if (!query.includeAnonymized && conversation.anonymized) return false
+/** Digits and E.164 for search only. The list still renders maskPhone. */
+export function searchablePhone(userPhone: string): string {
+  return `${userPhone} ${userPhone.replace(/\D/g, '')}`
+}
+
+export function matchesQuery(conversation: Conversation, query: ConversationQuery): boolean {
+  if (query.includeAnonymized === false && conversation.anonymized) return false
   if (query.language && query.language !== 'all' && conversation.language !== query.language) {
     return false
   }
@@ -47,7 +53,9 @@ function matchesQuery(conversation: Conversation, query: ConversationQuery): boo
   const haystack = [
     conversation.topic,
     conversation.language,
-    conversation.anonymized ? 'anonimizado borrado gdpr número eliminado' : maskPhone(conversation.userPhone),
+    conversation.anonymized
+      ? 'anonimizado borrado gdpr número eliminado'
+      : `${maskPhone(conversation.userPhone)} ${searchablePhone(conversation.userPhone)}`,
     ...conversation.events.map((event) => event.text),
   ]
     .join(' ')
@@ -80,8 +88,10 @@ export function createMockAdminApi(): AdminApi {
     async updateTenantSettings(tenantId, patch) {
       await wait(120)
       const tenant = requireTenant(tenantId)
+      const privacyPolicyUrl = safeNavigationUrl(patch.privacyPolicyUrl)
+      if (!privacyPolicyUrl) throw new Error('La política de privacidad tiene que ser https. En local también vale http://localhost.')
       tenant.systemPrompt = patch.systemPrompt
-      tenant.privacyPolicyUrl = patch.privacyPolicyUrl
+      tenant.privacyPolicyUrl = privacyPolicyUrl
       persist()
       return structuredClone(tenant)
     },

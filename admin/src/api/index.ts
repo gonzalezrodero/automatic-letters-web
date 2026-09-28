@@ -2,9 +2,9 @@ import { createHttpAdminApi } from './httpClient'
 import { createMockAdminApi } from './mockClient'
 import type { AdminApi } from './types'
 
-export function createAdminApi(getAccessToken: () => string | null): AdminApi {
+export function createAdminApi(): AdminApi {
   const base = import.meta.env.VITE_API_BASE?.trim()
-  if (base) return createHttpAdminApi(base, getAccessToken)
+  if (base) return createHttpAdminApi(base)
   return createMockAdminApi()
 }
 

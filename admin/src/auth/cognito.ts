@@ -1,39 +1,65 @@
+import { buildAuthorizeUrl, buildLogoutUrl, rememberOAuthRequest } from './oauth'
+
 /**
- * Cognito Hosted UI plug-in.
+ * Cognito Hosted UI.
  *
- * Production login should not collect a password here. Redirect the browser to
- * the hosted authorize endpoint and, on `/auth/callback`, send `code` to the
- * .NET API so it can exchange it for tokens (the client secret stays on the server).
+ * The browser redirects with state and PKCE (S256). On /auth/callback the code
+ * is checked against the state stored for this tab and posted to the API
+ * (`POST /auth/token`) with the code verifier. The client secret never ships here.
  *
- * Cognito groups:
- * - `admin` → super-admin, can switch tenants
- * - any other group name → tenant id (TenantProfile.Id), e.g. `club-basquet-sama`
+ * Groups, for display only:
+ * - `admin` wins and opens the superadmin view even if a tenant group is also present
+ * - any other group name is a tenant id, for example `club-basquet-sama`
  *
- * Set VITE_COGNITO_DOMAIN and VITE_COGNITO_CLIENT_ID to turn the login button
- * into a real redirect. Until then the UI only shows this contract.
+ * The API must enforce that. See the README.
  */
-export function cognitoAuthorizeUrl(): string | null {
+function cognitoDomain(): string | null {
   const domain = import.meta.env.VITE_COGNITO_DOMAIN?.replace(/^https?:\/\//, '').replace(/\/$/, '')
-  const clientId = import.meta.env.VITE_COGNITO_CLIENT_ID
-  if (!domain || !clientId) return null
+  return domain || null
+}
 
-  const redirect =
-    import.meta.env.VITE_COGNITO_REDIRECT_URI ??
-    `${window.location.origin}${import.meta.env.BASE_URL}auth/callback`
-
-  const url = new URL(`https://${domain}/oauth2/authorize`)
-  url.searchParams.set('client_id', clientId)
-  url.searchParams.set('response_type', 'code')
-  url.searchParams.set('scope', 'openid email profile')
-  url.searchParams.set('redirect_uri', redirect)
-  return url.toString()
+function cognitoClientId(): string | null {
+  return import.meta.env.VITE_COGNITO_CLIENT_ID || null
 }
 
 export function cognitoRedirectUri(): string {
   return (
     import.meta.env.VITE_COGNITO_REDIRECT_URI ??
-    `${typeof window === 'undefined' ? '' : window.location.origin}${import.meta.env.BASE_URL}auth/callback`
+    `${window.location.origin}${import.meta.env.BASE_URL}auth/callback`
   )
+}
+
+export function cognitoLogoutUri(): string {
+  return (
+    import.meta.env.VITE_COGNITO_LOGOUT_URI ??
+    `${window.location.origin}${import.meta.env.BASE_URL}login`
+  )
+}
+
+export function cognitoConfigured(): boolean {
+  return Boolean(cognitoDomain() && cognitoClientId())
+}
+
+/** Stores state and the PKCE verifier in sessionStorage, then returns the authorize URL. */
+export async function startCognitoLogin(): Promise<string | null> {
+  const domain = cognitoDomain()
+  const clientId = cognitoClientId()
+  if (!domain || !clientId) return null
+  const { state, challenge } = await rememberOAuthRequest(sessionStorage)
+  return buildAuthorizeUrl({
+    domain,
+    clientId,
+    redirectUri: cognitoRedirectUri(),
+    state,
+    codeChallenge: challenge,
+  })
+}
+
+export function cognitoLogoutUrl(): string | null {
+  const domain = cognitoDomain()
+  const clientId = cognitoClientId()
+  if (!domain || !clientId) return null
+  return buildLogoutUrl({ domain, clientId, logoutUri: cognitoLogoutUri() })
 }
 
 export const COGNITO_AUTHORIZE_TEMPLATE = [
@@ -41,5 +67,8 @@ export const COGNITO_AUTHORIZE_TEMPLATE = [
   '?client_id=ADMIN_CLIENT_ID',
   '&response_type=code',
   '&scope=openid%20email%20profile',
-  '&redirect_uri=https://www.core-webhook.eu/admin/auth/callback',
+  '&redirect_uri=https://admin.core-webhook.eu/auth/callback',
+  '&state=STATE',
+  '&code_challenge=PKCE_S256',
+  '&code_challenge_method=S256',
 ].join('')

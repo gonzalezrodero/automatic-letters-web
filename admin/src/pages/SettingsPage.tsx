@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useAdmin } from '../auth/AdminContext'
+import { safeNavigationUrl } from '../lib/safeUrl'
 
 export function SettingsPage() {
   const { api, tenant, replaceTenant } = useAdmin()
@@ -24,13 +25,9 @@ export function SettingsPage() {
   async function save() {
     setError(null)
     setNotice(null)
-    try {
-      const parsed = new URL(url)
-      if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
-        throw new Error('La política de privacidad tiene que ser una URL http o https.')
-      }
-    } catch (reason) {
-      setError(reason instanceof TypeError ? 'La URL de privacidad no es válida.' : (reason as Error).message)
+    const privacyUrl = safeNavigationUrl(url)
+    if (!privacyUrl) {
+      setError('La política de privacidad tiene que ser https. En local también vale http://localhost.')
       return
     }
     if (!prompt.trim()) {
@@ -41,7 +38,7 @@ export function SettingsPage() {
     try {
       const updated = await api.updateTenantSettings(tenant.id, {
         systemPrompt: prompt.trim(),
-        privacyPolicyUrl: url.trim(),
+        privacyPolicyUrl: privacyUrl,
       })
       replaceTenant(updated)
       setNotice('Guardado en esta demo. En producción actualizaría el TenantProfile.')
@@ -126,12 +123,22 @@ export function SettingsPage() {
           <p className="mt-3 font-display text-2xl">{tenant.shortName}</p>
           <p className="mt-1 text-sm text-white/60">{tenant.displayPhone}</p>
           <p className="mt-4 line-clamp-8 text-sm leading-relaxed text-white/80">{prompt}</p>
-          <a href={url} className="mt-4 block truncate text-sm text-bot hover:underline" target="_blank" rel="noreferrer">
-            {url}
-          </a>
+          <PrivacyLink value={url} />
         </aside>
       </div>
     </div>
+  )
+}
+
+function PrivacyLink({ value }: { value: string }) {
+  const href = safeNavigationUrl(value)
+  if (!href) {
+    return <p className="mt-4 truncate text-sm text-white/70">{value || 'Sin URL válida'}</p>
+  }
+  return (
+    <a href={href} className="mt-4 block truncate text-sm text-bot hover:underline" target="_blank" rel="noopener noreferrer">
+      {href}
+    </a>
   )
 }
 

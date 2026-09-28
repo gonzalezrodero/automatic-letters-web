@@ -1,4 +1,7 @@
+import { getCredential } from '../auth/credentials'
 import { endpoints } from './endpoints'
+import { publicApiError } from './errors'
+import { conversationSearchParams } from './query'
 import type {
   AdminApi,
   Conversation,
@@ -9,26 +12,43 @@ import type {
   TenantSettingsPatch,
 } from './types'
 
+const MISSING_SESSION = 'No hay sesión con el API. Entra con Cognito.'
+
 /**
- * Real client for the .NET API (automatic-envelopes). Unused while
- * VITE_API_BASE is empty. The bearer token is the Cognito access token
- * obtained after the Hosted UI code exchange — this portal does not
- * exchange the code itself.
+ * Real client for the .NET API. Unused while VITE_API_BASE is empty.
+ * Refuses to call without an in-memory bearer token or a cookie session
+ * confirmed in this tab. Tokens are not read from web storage.
  */
-export function createHttpAdminApi(baseUrl: string, getAccessToken: () => string | null): AdminApi {
+export function createHttpAdminApi(baseUrl: string): AdminApi {
   const root = baseUrl.replace(/\/$/, '')
 
   async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+    const credential = getCredential()
+    if (!credential) throw new Error(MISSING_SESSION)
+
     const headers = new Headers(init.headers)
-    const token = getAccessToken()
-    if (token) headers.set('Authorization', `Bearer ${token}`)
+    if (credential.kind === 'bearer') {
+      headers.set('Authorization', `Bearer ${credential.accessToken}`)
+    }
     if (init.body && !(init.body instanceof FormData) && !headers.has('Content-Type')) {
       headers.set('Content-Type', 'application/json')
     }
-    const response = await fetch(`${root}${path}`, { ...init, headers })
+
+    let response: Response
+    try {
+      response = await fetch(`${root}${path}`, {
+        ...init,
+        headers,
+        credentials: 'include',
+      })
+    } catch (error) {
+      console.error('API error', error)
+      throw new Error('No se ha podido contactar con el servidor.')
+    }
+
     if (!response.ok) {
       const detail = await response.text()
-      throw new Error(detail || `La API ha respondido ${response.status}.`)
+      throw publicApiError(response.status, detail)
     }
     if (response.status === 204) return undefined as T
     return (await response.json()) as T
@@ -51,16 +71,8 @@ export function createHttpAdminApi(baseUrl: string, getAccessToken: () => string
       return request<DashboardStats>(endpoints.dashboard(tenantId))
     },
     listConversations(tenantId, query: ConversationQuery) {
-      const params = new URLSearchParams()
-      if (query.q) params.set('q', query.q)
-      if (query.language && query.language !== 'all') params.set('language', query.language)
-      if (query.from) params.set('from', query.from)
-      if (query.to) params.set('to', query.to)
-      if (query.includeAnonymized === false) params.set('includeAnonymized', 'false')
-      const qs = params.toString()
-      return request<Conversation[]>(
-        `${endpoints.conversations(tenantId)}${qs ? `?${qs}` : ''}`,
-      )
+      const qs = conversationSearchParams(query).toString()
+      return request<Conversation[]>(`${endpoints.conversations(tenantId)}?${qs}`)
     },
     getConversation(tenantId, conversationId) {
       return request<Conversation>(endpoints.conversation(tenantId, conversationId))

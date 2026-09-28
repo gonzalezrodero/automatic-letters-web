@@ -51,6 +51,8 @@ export function ConversationsPage() {
 
   useEffect(() => {
     let cancel = false
+    setRows(null)
+    setError(null)
     api
       .listConversations(tenant.id, {
         q,

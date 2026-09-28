@@ -1,6 +1,20 @@
+import { copyFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { defineConfig, loadEnv, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+
+function spaFallback404(): Plugin {
+  return {
+    name: 'spa-fallback-404',
+    apply: 'build',
+    enforce: 'post',
+    writeBundle(options) {
+      if (!options.dir) return
+      copyFileSync(join(options.dir, 'index.html'), join(options.dir, '404.html'))
+    },
+  }
+}
 
 function redirectRootToBase(base: string): Plugin {
   const target = base.endsWith('/') ? base : `${base}/`
@@ -37,7 +51,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     base,
-    plugins: [react(), tailwindcss(), redirectRootToBase(base)],
+    plugins: [react(), tailwindcss(), redirectRootToBase(base), spaFallback404()],
     server: {
       host: '0.0.0.0',
       port: 5173,

@@ -1,2 +1,3 @@
-# Cloudflare Pages, when this app is the project root (subdomain deploy, VITE_BASE=/).
+# Cloudflare Pages when this app is the project (admin.core-webhook.eu, VITE_BASE=/).
+# Do not copy this file, or dist/index.html, over the marketing site root.
 /*    /index.html   200

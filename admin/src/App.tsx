@@ -17,8 +17,15 @@ function routerBasename(): string | undefined {
 }
 
 function RequireAuth() {
-  const { session } = useAuth()
+  const { session, ready } = useAuth()
   const location = useLocation()
+  if (!ready) {
+    return (
+      <div className="grid h-dvh place-items-center bg-paper">
+        <p className="text-sm text-ink-soft">Comprobando la sesión…</p>
+      </div>
+    )
+  }
   if (!session) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />
   }
