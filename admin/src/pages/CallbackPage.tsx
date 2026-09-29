@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { cognitoRedirectUri } from '../auth/cognito'
 import { takeOAuthCallbackFromWindow, type OAuthCallback } from '../auth/oauth'
+import { fetchSessionProfile } from '../api/session'
 import { exchangeAuthorizationCode } from '../api/token'
 import { Logo } from '../components/Logo'
 
@@ -31,8 +32,9 @@ export function CallbackPage() {
         code: pending.code,
         codeVerifier: pending.verifier,
         redirectUri: cognitoRedirectUri(),
-      }).then((result) => {
-        acceptApiSession(result.session, result.accessToken)
+      }).then(async (result) => {
+        const profile = await fetchSessionProfile(apiBase)
+        acceptApiSession(profile ?? result.session)
       })
     if (!existing) exchanges.set(pending.code, job)
 

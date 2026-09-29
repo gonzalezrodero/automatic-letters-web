@@ -4,6 +4,7 @@ import { resourceSegment } from './ids'
 export const endpoints = {
   me: '/me',
   token: '/auth/token',
+  logout: '/auth/logout',
   tenants: '/tenants',
   tenant: (tenantId: string) => `/tenants/${resourceSegment(tenantId)}`,
   dashboard: (tenantId: string) => `/tenants/${resourceSegment(tenantId)}/dashboard`,

@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { clearCredential, setBearerToken, setCookieSession } from './credentials'
-import { cognitoLogoutUrl } from './cognito'
+import { fetchSessionProfile } from '../api/session'
+import { requestApiLogout } from '../api/logout'
+import { clearCredential, setCookieSession } from './credentials'
+import { cognitoHost, cognitoLogoutUrl } from './cognito'
 import { sessionFromGroups, type DisplaySession, type Role } from './groups'
 import { clearOAuthRequest } from './oauth'
 
@@ -43,7 +45,7 @@ interface AuthContextValue {
   ready: boolean
   accounts: Array<Account & { role: Role }>
   login: (email: string, password: string) => string | null
-  acceptApiSession: (session: Session, accessToken: string | null) => void
+  acceptApiSession: (session: Session) => void
   logout: () => void
 }
 
@@ -78,25 +80,10 @@ function persistDemoSession(session: Session): void {
 }
 
 async function restoreCookieSession(base: string): Promise<Session | null> {
-  try {
-    const response = await fetch(`${base.replace(/\/$/, '')}/me`, {
-      credentials: 'include',
-      signal: AbortSignal.timeout(8000),
-    })
-    if (!response.ok) {
-      console.error('API error', response.status, (await response.text()).slice(0, 2000))
-      return null
-    }
-    const body = (await response.json()) as { email?: unknown; name?: unknown; groups?: unknown }
-    if (typeof body.email !== 'string' || !Array.isArray(body.groups)) return null
-    const groups = body.groups.filter((group): group is string => typeof group === 'string')
-    const name = typeof body.name === 'string' && body.name.trim() ? body.name : body.email
-    setCookieSession()
-    return sessionFromGroups(body.email, name, groups)
-  } catch (error) {
-    console.error('API error', error)
-    return null
-  }
+  const profile = await fetchSessionProfile(base)
+  if (!profile) return null
+  setCookieSession()
+  return profile
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -139,18 +126,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(next)
         return null
       },
-      acceptApiSession(next, accessToken) {
-        if (accessToken) setBearerToken(accessToken)
-        else setCookieSession()
+      acceptApiSession(next) {
+        setCookieSession()
         setSession(next)
       },
       logout() {
+        const baseAtLogout = base
         clearCredential()
         clearOAuthRequest(sessionStorage)
         sessionStorage.removeItem(STORAGE_KEY)
         setSession(null)
-        const url = cognitoLogoutUrl()
-        if (url) window.location.assign(url)
+        void (async () => {
+          const fromApi = baseAtLogout ? await requestApiLogout(baseAtLogout, cognitoHost()) : null
+          const url = fromApi ?? cognitoLogoutUrl()
+          if (url) window.location.assign(url)
+        })()
       },
     }),
     [accounts, base, ready, session],

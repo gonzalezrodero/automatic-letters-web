@@ -16,8 +16,11 @@ const MISSING_SESSION = 'No hay sesión con el API. Entra con Cognito.'
 
 /**
  * Real client for the .NET API. Unused while VITE_API_BASE is empty.
- * Refuses to call without an in-memory bearer token or a cookie session
- * confirmed in this tab. Tokens are not read from web storage.
+ * Sends credentials: 'include' so the BFF cookies (ae_access, and ae_id on /me)
+ * travel with the request. A bearer header is added only for an explicit
+ * in-memory bearer credential. The Cognito callback does not set one, because
+ * Authorization would make the API ignore ae_access. Tokens are not read from
+ * web storage.
  */
 export function createHttpAdminApi(baseUrl: string): AdminApi {
   const root = baseUrl.replace(/\/$/, '')

@@ -13,7 +13,8 @@ import { buildAuthorizeUrl, buildLogoutUrl, rememberOAuthRequest } from './oauth
  *
  * The API must enforce that. See the README.
  */
-function cognitoDomain(): string | null {
+/** Host only, no scheme. Authorize and logout URLs are built as https://<host>/... */
+export function cognitoHost(): string | null {
   const domain = import.meta.env.VITE_COGNITO_DOMAIN?.replace(/^https?:\/\//, '').replace(/\/$/, '')
   return domain || null
 }
@@ -37,12 +38,12 @@ export function cognitoLogoutUri(): string {
 }
 
 export function cognitoConfigured(): boolean {
-  return Boolean(cognitoDomain() && cognitoClientId())
+  return Boolean(cognitoHost() && cognitoClientId())
 }
 
 /** Stores state and the PKCE verifier in sessionStorage, then returns the authorize URL. */
 export async function startCognitoLogin(): Promise<string | null> {
-  const domain = cognitoDomain()
+  const domain = cognitoHost()
   const clientId = cognitoClientId()
   if (!domain || !clientId) return null
   const { state, challenge } = await rememberOAuthRequest(sessionStorage)
@@ -56,7 +57,7 @@ export async function startCognitoLogin(): Promise<string | null> {
 }
 
 export function cognitoLogoutUrl(): string | null {
-  const domain = cognitoDomain()
+  const domain = cognitoHost()
   const clientId = cognitoClientId()
   if (!domain || !clientId) return null
   return buildLogoutUrl({ domain, clientId, logoutUri: cognitoLogoutUri() })

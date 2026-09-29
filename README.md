@@ -18,7 +18,7 @@ Per-tenant console, in Spanish, with mock data for two organizations:
 - **Club Bàsquet Samà** (Cambrils) — summer basketball camp
 - **Escola de Música L’Harmonia** (Girona)
 
-About ten conversations each, in Catalan, Spanish, and English, including one anonymized GDPR deletion per tenant. Nothing calls the .NET backend yet. The UI talks to an `AdminApi`; `VITE_API_BASE` swaps the in-memory client for `fetch`.
+About ten conversations each, in Catalan, Spanish, and English, including one anonymized GDPR deletion per tenant. The UI talks to an `AdminApi`. With `VITE_API_BASE` empty it uses the in-memory client. [`admin/.env.development`](admin/.env.development) points `npm run dev` at the development API and Cognito Hosted UI.
 
 ### Run locally
 
@@ -32,7 +32,11 @@ npm run dev
 
 Open [http://localhost:5173/admin/](http://localhost:5173/admin/). The dev server redirects `/` to `/admin/`.
 
-Demo passwords are all `demo`:
+`npm run dev` loads [`admin/.env.development`](admin/.env.development). That file sets `VITE_API_BASE`, so demo passwords are off and sign-in is Cognito. The callback is `http://localhost:5173/admin/auth/callback` and logout returns to `http://localhost:5173/admin/login`. `VITE_COGNITO_DOMAIN` is the Hosted UI host without a scheme. Copy that file as-is if it is missing; the values are the development Function URL and the public PKCE app client. This file is not read by `npm run build`.
+
+To use the mock data instead, add `admin/.env.development.local` (gitignored) with `VITE_API_BASE=` empty and restart the dev server. That override wins over `.env.development`.
+
+Demo passwords, only while `VITE_API_BASE` is empty, are all `demo`:
 
 | Correo | Rol |
 | --- | --- |
@@ -40,7 +44,7 @@ Demo passwords are all `demo`:
 | `campus@cbsama.cat` | Only Club Bàsquet Samà |
 | `secretaria@harmonia.cat` | Only Escola de Música L’Harmonia |
 
-`Continuar con Cognito` does not redirect until `VITE_COGNITO_DOMAIN` and `VITE_COGNITO_CLIENT_ID` are set. Until then it shows where the Hosted UI plugs in. See [`admin/src/auth/cognito.ts`](admin/src/auth/cognito.ts) and [`admin/.env.example`](admin/.env.example).
+`Continuar con Cognito` does not redirect until `VITE_COGNITO_DOMAIN` and `VITE_COGNITO_CLIENT_ID` are set. With `.env.development` they are. See [`admin/src/auth/cognito.ts`](admin/src/auth/cognito.ts) and [`admin/.env.example`](admin/.env.example).
 
 ### Build
 
@@ -89,9 +93,9 @@ GitHub Pages serving the branch root will show the Vite **source** `admin/index.
 
 ### Cognito
 
-`Continuar con Cognito` stores a random `state` and a PKCE verifier in `sessionStorage`, then redirects to the Hosted UI with `code_challenge_method=S256`. The callback checks `state`, strips `code` from the URL with `history.replaceState`, and `POST`s the code plus verifier to `/auth/token`. The client secret stays on the server.
+`Continuar con Cognito` stores a random `state` and a PKCE verifier in `sessionStorage`, then redirects to the Hosted UI with `code_challenge_method=S256`. The callback checks `state`, strips `code` from the URL with `history.replaceState`, and `POST`s `{ code, codeVerifier, redirectUri }` to `/auth/token` with `credentials: 'include'`. The client secret stays on the server. The BFF sets the httpOnly cookies and the portal then calls `GET /me` to read the session. The profile in the token response is used only if `/me` does not return one.
 
-Logout, when Cognito is configured, goes to `https://<domain>/logout` after clearing the tab session.
+Logout `POST`s `/auth/logout` (the browser sends `Origin`) and redirects to the returned `cognitoLogoutUrl` when that URL is `https` on `VITE_COGNITO_DOMAIN` and the path is `/logout`. Otherwise it falls back to `https://<domain>/logout` built in the browser.
 
 If the token’s groups include `admin`, the UI treats the person as superadmin even when a tenant group is also present. Any other group name is a tenant id (`club-basquet-sama`). That label is for display. It is not an access check.
 
@@ -99,8 +103,8 @@ If the token’s groups include `admin`, the UI treats the person as superadmin 
 
 The browser role is display-only. With `VITE_API_BASE` set, demo passwords are rejected and every data request requires a credential established in this tab:
 
-- **Preferred:** `POST /auth/token` sets an httpOnly, Secure, SameSite cookie and returns `{ email, name, groups }` with no tokens in the JSON. Later calls use `credentials: 'include'`. On load, the portal calls `GET /me` once to see whether that cookie is still present.
-- **Also supported:** the token response includes `accessToken`. The portal keeps it in a module variable for the lifetime of the tab and sends `Authorization: Bearer`. It is not written to `localStorage` or `sessionStorage`. A refresh drops it. A `refreshToken` in the JSON is ignored.
+- **Development session:** `POST /auth/token` sets httpOnly cookies (`ae_access`, and `ae_id` for `/me`) and returns `{ email, name, groups }`. The portal does not store access or refresh tokens. If the JSON includes either, it is ignored. Later calls use `credentials: 'include'` and do not send `Authorization`, because a bearer header would make the API skip `ae_access`. On load, and again after the code exchange, the portal calls `GET /me`. That call needs the `ae_id` cookie; a bearer token alone is not enough.
+- The HTTP client can still attach an in-memory bearer if something sets one for the tab. The Cognito callback does not. Nothing is written to `localStorage` or `sessionStorage` except the PKCE verifier, `state`, and (mock mode only) the display session.
 
 The API must, on every request, verify the access token’s signature, issuer, audience, and expiry, read `cognito:groups` from that token, and authorize the `{tenantId}` in the path on the server. A caller who only has the group `club-basquet-sama` must not receive or modify `escola-harmonia`, even if the portal asks. The group `admin` may access every tenant. Do not trust the role, tenant id, or group list sent by the browser.
 
@@ -110,8 +114,9 @@ Base URL: `VITE_API_BASE`. Paths are defined in [`admin/src/api/endpoints.ts`](a
 
 | Method | Path | Body / query | Returns |
 | --- | --- | --- | --- |
-| `GET` | `/me` | — | `{ email, name, groups }` so the UI can map `admin` vs tenant id. Not called by the mock. |
-| `POST` | `/auth/token` | `{ code, codeVerifier, redirectUri }` | Profile `{ email, name, groups }`. Set an httpOnly cookie, or also return `accessToken` for tab memory. Do not rely on the browser to store a refresh token. |
+| `GET` | `/me` | cookie `ae_id` | `{ email, name, groups }` so the UI can map `admin` vs tenant id. Not called by the mock. |
+| `POST` | `/auth/token` | `{ code, codeVerifier, redirectUri }` | Profile `{ email, name, groups }` and httpOnly cookies. The portal ignores `accessToken` and `refreshToken` in the JSON. |
+| `POST` | `/auth/logout` | `Origin` | Clears the cookies and returns `{ cognitoLogoutUrl }`. The portal redirects there when the URL is the configured Hosted UI `/logout`. |
 | `GET` | `/tenants` | — | `TenantProfile[]` |
 | `GET` | `/tenants/{tenantId}` | — | `TenantProfile` |
 | `PATCH` | `/tenants/{tenantId}` | `{ systemPrompt, privacyPolicyUrl }` | updated `TenantProfile` |
@@ -159,14 +164,7 @@ Ids in those paths are a single segment matching `^[a-z0-9-]+$` and are URL-enco
 
 `privacyPolicyUrl` is rendered as a link only when it is `https`, or `http` on localhost / 127.0.0.1. Anything else, including values returned by the API, is shown as text.
 
-To point the portal at the API:
-
-```bash
-# admin/.env.local
-VITE_API_BASE=https://api.core-webhook.eu
-```
-
-Restart `npm run dev`. Uploads, settings, and lists then go through [`admin/src/api/httpClient.ts`](admin/src/api/httpClient.ts). `resetDemo()` exists only on the mock.
+Local `npm run dev` already points at the development API through [`admin/.env.development`](admin/.env.development). Uploads, settings, and lists then go through [`admin/src/api/httpClient.ts`](admin/src/api/httpClient.ts). `resetDemo()` exists only on the mock. Production hosts (`admin.core-webhook.eu`, Cloudflare Pages) are a separate step and are not configured by that file.
 
 ### Tests
 

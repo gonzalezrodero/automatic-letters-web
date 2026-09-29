@@ -4,8 +4,6 @@ import { sessionFromGroups, type DisplaySession } from '../auth/groups'
 
 export interface TokenExchange {
   session: DisplaySession
-  /** Present only when the API returns a bearer token. Never a refresh token. */
-  accessToken: string | null
 }
 
 interface TokenBody {
@@ -18,8 +16,9 @@ interface TokenBody {
 
 /**
  * Sends the authorization code to the API. The client secret stays on the server.
- * A refresh token in the JSON is ignored and not stored.
- * If accessToken is absent, the API is expected to have set an httpOnly cookie.
+ * The development BFF sets httpOnly cookies and returns { email, name, groups }.
+ * Access and refresh tokens in the JSON are ignored and never stored. Sending
+ * Authorization later would hide the ae_access cookie, so the session is the cookie.
  */
 export async function exchangeAuthorizationCode(input: {
   apiBase: string
@@ -52,8 +51,8 @@ export async function exchangeAuthorizationCode(input: {
   }
 
   const body = (await response.json()) as TokenBody
-  if (typeof body.refreshToken === 'string') {
-    console.error('API error', 'El API ha devuelto un refresh token. El navegador lo ignora.')
+  if (typeof body.refreshToken === 'string' || typeof body.accessToken === 'string') {
+    console.error('API error', 'El API ha devuelto un token en el JSON. El navegador usa la cookie y no lo guarda.')
   }
   if (typeof body.email !== 'string' || !Array.isArray(body.groups)) {
     throw new Error('La respuesta de acceso no incluye el perfil.')
@@ -62,6 +61,5 @@ export async function exchangeAuthorizationCode(input: {
   const name = typeof body.name === 'string' && body.name.trim() ? body.name : body.email
   return {
     session: sessionFromGroups(body.email, name, groups),
-    accessToken: typeof body.accessToken === 'string' && body.accessToken ? body.accessToken : null,
   }
 }
