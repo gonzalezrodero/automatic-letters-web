@@ -14,6 +14,7 @@ import {
 import { useAuth } from '../auth/AuthContext'
 import { useAdmin } from '../auth/AdminContext'
 import { cn, initials } from '../lib/format'
+import { tenantPlaceLine, tenantShortLabel, tenantTitle } from '../lib/tenantLabel'
 import { Logo } from './Logo'
 
 const links = [
@@ -30,6 +31,9 @@ export function Shell() {
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const superadmin = session?.role === 'superadmin'
+  const title = tenantTitle(tenant)
+  const shortLabel = tenantShortLabel(tenant)
+  const place = tenantPlaceLine(tenant)
   const previousTenant = useRef(tenant.id)
 
   useEffect(() => {
@@ -109,7 +113,7 @@ export function Shell() {
             <div className="min-w-0">
               <p className="truncate text-sm font-medium">{session?.name}</p>
               <p className="truncate text-xs text-white/55">
-                {superadmin ? 'Superadmin' : tenant.shortName}
+                {superadmin ? 'Superadmin' : shortLabel}
               </p>
             </div>
           </div>
@@ -135,10 +139,8 @@ export function Shell() {
             <Menu className="h-5 w-5" />
           </button>
           <div className="min-w-0 flex-1">
-            <p className="truncate font-display text-lg leading-tight">{tenant.name}</p>
-            <p className="truncate text-xs text-ink-soft">
-              {tenant.city} · {tenant.kind}
-            </p>
+            <p className="truncate font-display text-lg leading-tight">{title}</p>
+            {place ? <p className="truncate text-xs text-ink-soft">{place}</p> : null}
           </div>
           {superadmin ? (
             <label className="relative hidden sm:block">
@@ -150,7 +152,7 @@ export function Shell() {
               >
                 {tenants.map((item) => (
                   <option key={item.id} value={item.id}>
-                    {item.shortName}
+                    {tenantShortLabel(item)}
                   </option>
                 ))}
               </select>
@@ -158,7 +160,7 @@ export function Shell() {
             </label>
           ) : (
             <span className="hidden rounded-full bg-foam px-3 py-1 text-xs font-medium text-moss-deep sm:inline">
-              {tenant.shortName}
+              {shortLabel}
             </span>
           )}
         </header>

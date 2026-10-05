@@ -9,7 +9,7 @@ import { buildAuthorizeUrl, buildLogoutUrl, rememberOAuthRequest } from './oauth
  *
  * Groups, for display only:
  * - `admin` wins and opens the superadmin view even if a tenant group is also present
- * - any other group name is a tenant id, for example `club-basquet-sama`
+ * - any other group name is a tenant id, for example `example-tenant`
  *
  * The API must enforce that. See the README.
  */

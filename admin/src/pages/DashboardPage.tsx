@@ -6,6 +6,7 @@ import { useAuth } from '../auth/AuthContext'
 import { useAdmin } from '../auth/AdminContext'
 import { ActivityChart, LanguageMix, TopicBars } from '../components/Charts'
 import { formatListTime, languageShort } from '../lib/format'
+import { tenantShortLabel } from '../lib/tenantLabel'
 
 export function DashboardPage() {
   const { session } = useAuth()
@@ -41,7 +42,7 @@ export function DashboardPage() {
               Hola, {session?.name.split(' ')[0]}
             </h1>
             <p className="mt-2 max-w-xl text-ink-soft">
-              Así ha hablado el bot de {tenant.shortName} con las familias. Los números salen de las conversaciones de demostración.
+              Así ha hablado el bot de {tenantShortLabel(tenant)} con las familias. Los números salen de las conversaciones de demostración.
             </p>
           </div>
           <span className="rounded-full bg-foam px-3 py-1 text-xs font-medium text-moss-deep">

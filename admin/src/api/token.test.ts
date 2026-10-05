@@ -12,7 +12,7 @@ describe('exchangeAuthorizationCode', () => {
         JSON.stringify({
           email: 'ada@example.com',
           name: 'Ada',
-          groups: ['club-basquet-sama', 'admin'],
+          groups: ['example-tenant', 'admin'],
           accessToken: 'access-1',
           refreshToken: 'refresh-1',
         }),

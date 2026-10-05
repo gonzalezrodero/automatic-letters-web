@@ -4,6 +4,7 @@ import type { DashboardStats, TenantProfile } from '../api/types'
 import { useAuth } from '../auth/AuthContext'
 import { useAdmin } from '../auth/AdminContext'
 import { cn } from '../lib/format'
+import { tenantPlaceLine, tenantTitle } from '../lib/tenantLabel'
 
 interface Row {
   tenant: TenantProfile
@@ -62,10 +63,10 @@ export function TenantsPage() {
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <h2 className="font-display text-2xl">{row.tenant.name}</h2>
-                    <p className="text-sm text-ink-soft">
-                      {row.tenant.city} · {row.tenant.kind}
-                    </p>
+                    <h2 className="font-display text-2xl">{tenantTitle(row.tenant)}</h2>
+                    {tenantPlaceLine(row.tenant) ? (
+                      <p className="text-sm text-ink-soft">{tenantPlaceLine(row.tenant)}</p>
+                    ) : null}
                   </div>
                   {current ? (
                     <span className="rounded-full bg-foam px-2.5 py-1 text-xs font-medium text-moss-deep">

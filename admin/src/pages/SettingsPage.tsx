@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useAdmin } from '../auth/AdminContext'
 import { safeNavigationUrl } from '../lib/safeUrl'
+import { tenantShortLabel, tenantTitle } from '../lib/tenantLabel'
 
 export function SettingsPage() {
   const { api, tenant, replaceTenant } = useAdmin()
@@ -60,7 +61,7 @@ export function SettingsPage() {
         <div>
           <h1 className="font-display text-4xl">Ajustes del bot</h1>
           <p className="mt-2 max-w-2xl text-ink-soft">
-            Persona y enlace de privacidad de {tenant.name}. El número de WhatsApp lo asigna Meta y aquí solo se
+            Persona y enlace de privacidad de {tenantTitle(tenant)}. El número de WhatsApp lo asigna Meta y aquí solo se
             muestra.
           </p>
 
@@ -120,8 +121,10 @@ export function SettingsPage() {
 
         <aside className="h-fit rounded-3xl border border-line bg-ink p-5 text-white lg:sticky lg:top-6">
           <p className="text-xs tracking-[0.16em] text-white/50 uppercase">Cómo se presenta</p>
-          <p className="mt-3 font-display text-2xl">{tenant.shortName}</p>
-          <p className="mt-1 text-sm text-white/60">{tenant.displayPhone}</p>
+          <p className="mt-3 font-display text-2xl">{tenantShortLabel(tenant)}</p>
+          {tenant.displayPhone.trim() ? (
+            <p className="mt-1 text-sm text-white/60">{tenant.displayPhone.trim()}</p>
+          ) : null}
           <p className="mt-4 line-clamp-8 text-sm leading-relaxed text-white/80">{prompt}</p>
           <PrivacyLink value={url} />
         </aside>

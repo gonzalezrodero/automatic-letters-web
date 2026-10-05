@@ -10,7 +10,7 @@ export function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const from = safeInternalPath((location.state as { from?: unknown } | null)?.from)
-  const [email, setEmail] = useState('admin@core-webhook.eu')
+  const [email, setEmail] = useState('admin@example.com')
   const [password, setPassword] = useState('demo')
   const [error, setError] = useState<string | null>(null)
   const [showCognito, setShowCognito] = useState(false)
@@ -64,10 +64,10 @@ export function LoginPage() {
         </div>
         <div className="max-w-sm rounded-3xl bg-white/10 p-4 ring-1 ring-white/15">
           <div className="ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-bot px-3 py-2 text-sm text-ink">
-            Queden 7 places al grup d’iniciació. El campus és de 9:00 a 13:30.
+            El bot responde con lo que hay en los documentos de la organización.
             <p className="mt-1 text-right text-[11px] text-ink-soft">Bot · 09:14</p>
           </div>
-          <p className="mt-3 text-xs text-white/45">Club Bàsquet Samà · vista de demostración</p>
+          <p className="mt-3 text-xs text-white/45">Vista de demostración</p>
         </div>
       </section>
 

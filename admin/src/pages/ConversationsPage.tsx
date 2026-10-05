@@ -14,6 +14,7 @@ import {
   lastPreview,
   maskPhone,
 } from '../lib/format'
+import { tenantShortLabel } from '../lib/tenantLabel'
 
 export function ConversationsPage() {
   const { conversationId } = useParams()
@@ -196,7 +197,7 @@ export function ConversationsPage() {
             <div>
               <p className="font-display text-3xl">Elige una conversación</p>
               <p className="mt-2 max-w-sm text-sm text-ink-soft">
-                A la izquierda están los hilos de {tenant.shortName}, con el último mensaje y la hora.
+                A la izquierda están los hilos de {tenantShortLabel(tenant)}, con el último mensaje y la hora.
               </p>
             </div>
           </div>

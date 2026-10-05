@@ -94,8 +94,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
           <h1 className="font-display text-3xl">Sin acceso a una organización</h1>
           <p className="mt-3 text-sm leading-relaxed text-ink-soft">
             Esta cuenta no tiene un tenant asignado. El grupo <code className="text-ink">admin</code> ve todas
-            las organizaciones; cualquier otro grupo tiene que llamarse como el id del tenant, por ejemplo{' '}
-            <code className="text-ink">club-basquet-sama</code>.
+            las organizaciones; cualquier otro grupo tiene que llamarse como el id del tenant.
           </p>
           <button
             type="button"

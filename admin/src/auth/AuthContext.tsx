@@ -19,22 +19,10 @@ interface Account {
 
 const ACCOUNTS: Account[] = [
   {
-    email: 'admin@core-webhook.eu',
+    email: 'admin@example.com',
     password: 'demo',
-    name: 'Daniel González',
+    name: 'Admin',
     groups: ['admin'],
-  },
-  {
-    email: 'campus@cbsama.cat',
-    password: 'demo',
-    name: 'Núria Solé',
-    groups: ['club-basquet-sama'],
-  },
-  {
-    email: 'secretaria@harmonia.cat',
-    password: 'demo',
-    name: 'Marc Puig',
-    groups: ['escola-harmonia'],
   },
 ]
 

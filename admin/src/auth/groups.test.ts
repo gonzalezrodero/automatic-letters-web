@@ -3,15 +3,15 @@ import { sessionFromGroups } from './groups'
 
 describe('sessionFromGroups', () => {
   it('lets the admin group win over a tenant group', () => {
-    const session = sessionFromGroups('ada@example.com', 'Ada', ['club-basquet-sama', 'admin'])
+    const session = sessionFromGroups('ada@example.com', 'Ada', ['example-tenant', 'admin'])
     expect(session.role).toBe('superadmin')
     expect(session.tenantId).toBeNull()
   })
 
   it('maps a single tenant group to that id', () => {
-    const session = sessionFromGroups('nuria@cbsama.cat', 'Núria', ['club-basquet-sama'])
+    const session = sessionFromGroups('ada@example.com', 'Ada', ['example-tenant'])
     expect(session.role).toBe('tenant')
-    expect(session.tenantId).toBe('club-basquet-sama')
+    expect(session.tenantId).toBe('example-tenant')
   })
 
   it('does not treat a non-matching group as admin', () => {

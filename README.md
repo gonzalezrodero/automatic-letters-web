@@ -13,12 +13,9 @@ The portal lives in [`admin/`](admin/) and does not replace those pages.
 
 ## Admin portal
 
-Per-tenant console, in Spanish, with mock data for two organizations:
+Per-tenant console, in Spanish. Tenants, names, and conversations come from the API (or from the database). The portal does not ship a club, a phone number, or sample threads.
 
-- **Club Bàsquet Samà** (Cambrils) — summer basketball camp
-- **Escola de Música L’Harmonia** (Girona)
-
-About ten conversations each, in Catalan, Spanish, and English, including one anonymized GDPR deletion per tenant. The UI talks to an `AdminApi`. With `VITE_API_BASE` empty it uses the in-memory client. [`admin/.env.development`](admin/.env.development) points `npm run dev` at the development API and Cognito Hosted UI.
+With `VITE_API_BASE` empty it uses an in-memory client that starts empty. [`admin/.env.development`](admin/.env.development) points `npm run dev` at the development API and Cognito Hosted UI.
 
 ### Run locally
 
@@ -34,15 +31,13 @@ Open [http://localhost:5173/admin/](http://localhost:5173/admin/). The dev serve
 
 `npm run dev` loads [`admin/.env.development`](admin/.env.development). That file sets `VITE_API_BASE`, so demo passwords are off and sign-in is Cognito. The callback is `http://localhost:5173/admin/auth/callback` and logout returns to `http://localhost:5173/admin/login`. `VITE_COGNITO_DOMAIN` is the Hosted UI host without a scheme. Copy that file as-is if it is missing; the values are the development Function URL and the public PKCE app client. This file is not read by `npm run build`.
 
-To use the mock data instead, add `admin/.env.development.local` (gitignored) with `VITE_API_BASE=` empty and restart the dev server. That override wins over `.env.development`.
+To use the empty in-memory client instead, add `admin/.env.development.local` (gitignored) with `VITE_API_BASE=` empty and restart the dev server. That override wins over `.env.development`.
 
-Demo passwords, only while `VITE_API_BASE` is empty, are all `demo`:
+The only demo password, and only while `VITE_API_BASE` is empty, is `demo`:
 
 | Correo | Rol |
 | --- | --- |
-| `admin@core-webhook.eu` | Superadmin. Can switch tenants. |
-| `campus@cbsama.cat` | Only Club Bàsquet Samà |
-| `secretaria@harmonia.cat` | Only Escola de Música L’Harmonia |
+| `admin@example.com` | Superadmin. The organization list is empty until the API returns tenants. |
 
 `Continuar con Cognito` does not redirect until `VITE_COGNITO_DOMAIN` and `VITE_COGNITO_CLIENT_ID` are set. With `.env.development` they are. See [`admin/src/auth/cognito.ts`](admin/src/auth/cognito.ts) and [`admin/.env.example`](admin/.env.example).
 
@@ -97,7 +92,7 @@ GitHub Pages serving the branch root will show the Vite **source** `admin/index.
 
 Logout `POST`s `/auth/logout` (the browser sends `Origin`) and redirects to the returned `cognitoLogoutUrl` when that URL is `https` on `VITE_COGNITO_DOMAIN` and the path is `/logout`. Otherwise it falls back to `https://<domain>/logout` built in the browser.
 
-If the token’s groups include `admin`, the UI treats the person as superadmin even when a tenant group is also present. Any other group name is a tenant id (`club-basquet-sama`). That label is for display. It is not an access check.
+If the token’s groups include `admin`, the UI treats the person as superadmin even when a tenant group is also present. Any other group name is a tenant id. That label is for display. It is not an access check.
 
 ### Authorization
 
@@ -106,7 +101,7 @@ The browser role is display-only. With `VITE_API_BASE` set, demo passwords are r
 - **Development session:** `POST /auth/token` sets httpOnly cookies (`ae_access`, and `ae_id` for `/me`) and returns `{ email, name, groups }`. The portal does not store access or refresh tokens. If the JSON includes either, it is ignored. Later calls use `credentials: 'include'` and do not send `Authorization`, because a bearer header would make the API skip `ae_access`. On load, and again after the code exchange, the portal calls `GET /me`. That call needs the `ae_id` cookie; a bearer token alone is not enough.
 - The HTTP client can still attach an in-memory bearer if something sets one for the tab. The Cognito callback does not. Nothing is written to `localStorage` or `sessionStorage` except the PKCE verifier, `state`, and (mock mode only) the display session.
 
-The API must, on every request, verify the access token’s signature, issuer, audience, and expiry, read `cognito:groups` from that token, and authorize the `{tenantId}` in the path on the server. A caller who only has the group `club-basquet-sama` must not receive or modify `escola-harmonia`, even if the portal asks. The group `admin` may access every tenant. Do not trust the role, tenant id, or group list sent by the browser.
+The API must, on every request, verify the access token’s signature, issuer, audience, and expiry, read `cognito:groups` from that token, and authorize the `{tenantId}` in the path on the server. A caller whose only group is one tenant id must not receive or modify another tenant, even if the portal asks. The group `admin` may access every tenant. Do not trust the role, tenant id, or group list sent by the browser.
 
 ### Backend endpoints
 

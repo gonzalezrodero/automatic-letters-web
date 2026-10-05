@@ -3,8 +3,8 @@ import { matchesQuery, searchablePhone } from './mockClient'
 import type { Conversation } from './types'
 
 const thread: Conversation = {
-  id: 'cbs-01',
-  tenantId: 'club-basquet-sama',
+  id: 'thread-01',
+  tenantId: 'example-tenant',
   userPhone: '+34611223301',
   language: 'ca',
   topic: 'Inscripció',
