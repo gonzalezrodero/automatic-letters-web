@@ -1,6 +1,6 @@
 import { resourceSegment } from './ids'
 
-/** Paths the HTTP client will call. Keep the README list in sync with this file. */
+/** Live paths plus the later panel, conversation, and document contract. The HTTP client only calls the live ones. */
 export const endpoints = {
   me: '/me',
   token: '/auth/token',

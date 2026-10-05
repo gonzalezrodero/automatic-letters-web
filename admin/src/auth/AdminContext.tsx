@@ -88,6 +88,25 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   }
 
   if (!value) {
+    if (session.role === 'superadmin') {
+      return (
+        <div className="grid h-full place-items-center px-6 text-center">
+          <div className="max-w-md">
+            <h1 className="font-display text-3xl">Todavía no hay organizaciones</h1>
+            <p className="mt-3 text-sm leading-relaxed text-ink-soft">
+              La cuenta de administración es válida. Cuando el API devuelva tenants, el portal los listará aquí.
+            </p>
+            <button
+              type="button"
+              onClick={logout}
+              className="mt-6 rounded-2xl bg-ink px-5 py-3 text-sm font-semibold text-white"
+            >
+              Cerrar sesión
+            </button>
+          </div>
+        </div>
+      )
+    }
     return (
       <div className="grid h-full place-items-center px-6 text-center">
         <div className="max-w-md">

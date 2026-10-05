@@ -1,16 +1,7 @@
 import { getCredential } from '../auth/credentials'
 import { endpoints } from './endpoints'
-import { publicApiError } from './errors'
-import { conversationSearchParams } from './query'
-import type {
-  AdminApi,
-  Conversation,
-  ConversationQuery,
-  DashboardStats,
-  KnowledgeDocument,
-  TenantProfile,
-  TenantSettingsPatch,
-} from './types'
+import { UnavailableApiError, publicApiError } from './errors'
+import type { AdminApi, TenantProfile, TenantSettingsPatch } from './types'
 
 const MISSING_SESSION = 'No hay sesión con el API. Entra con Cognito.'
 
@@ -70,29 +61,23 @@ export function createHttpAdminApi(baseUrl: string): AdminApi {
         body: JSON.stringify(patch),
       })
     },
-    getDashboard(tenantId) {
-      return request<DashboardStats>(endpoints.dashboard(tenantId))
+    getDashboard() {
+      return Promise.reject(new UnavailableApiError())
     },
-    listConversations(tenantId, query: ConversationQuery) {
-      const qs = conversationSearchParams(query).toString()
-      return request<Conversation[]>(`${endpoints.conversations(tenantId)}?${qs}`)
+    listConversations() {
+      return Promise.reject(new UnavailableApiError())
     },
-    getConversation(tenantId, conversationId) {
-      return request<Conversation>(endpoints.conversation(tenantId, conversationId))
+    getConversation() {
+      return Promise.reject(new UnavailableApiError())
     },
-    listDocuments(tenantId) {
-      return request<KnowledgeDocument[]>(endpoints.documents(tenantId))
+    listDocuments() {
+      return Promise.reject(new UnavailableApiError())
     },
-    uploadDocument(tenantId, file: File) {
-      const body = new FormData()
-      body.set('file', file)
-      return request<KnowledgeDocument>(endpoints.documents(tenantId), {
-        method: 'POST',
-        body,
-      })
+    uploadDocument() {
+      return Promise.reject(new UnavailableApiError())
     },
-    deleteDocument(tenantId, documentId) {
-      return request<void>(endpoints.document(tenantId, documentId), { method: 'DELETE' })
+    deleteDocument() {
+      return Promise.reject(new UnavailableApiError())
     },
     async resetDemo() {
       throw new Error('Restablecer la demo solo existe en el cliente simulado.')

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
+import { isUnavailable } from '../api/errors'
 import type { DashboardStats, TenantProfile } from '../api/types'
 import { useAuth } from '../auth/AuthContext'
 import { useAdmin } from '../auth/AdminContext'
@@ -8,7 +9,7 @@ import { tenantPlaceLine, tenantTitle } from '../lib/tenantLabel'
 
 interface Row {
   tenant: TenantProfile
-  stats: DashboardStats
+  stats: DashboardStats | null
 }
 
 export function TenantsPage() {
@@ -17,19 +18,26 @@ export function TenantsPage() {
   const navigate = useNavigate()
   const [rows, setRows] = useState<Row[] | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [metricsMissing, setMetricsMissing] = useState(false)
 
   useEffect(() => {
     if (session?.role !== 'superadmin') return
     let cancel = false
     setRows(null)
     Promise.all(
-      tenants.map(async (item) => ({
-        tenant: item,
-        stats: await api.getDashboard(item.id),
-      })),
+      tenants.map(async (item) => {
+        try {
+          return { tenant: item, stats: await api.getDashboard(item.id) }
+        } catch (reason) {
+          if (isUnavailable(reason)) return { tenant: item, stats: null }
+          throw reason
+        }
+      }),
     )
       .then((next) => {
-        if (!cancel) setRows(next)
+        if (cancel) return
+        setRows(next)
+        setMetricsMissing(next.length > 0 && next.every((row) => row.stats === null))
       })
       .catch((reason: unknown) => {
         if (!cancel) setError(reason instanceof Error ? reason.message : 'No se pudieron comparar.')
@@ -49,6 +57,9 @@ export function TenantsPage() {
           Vista de superadmin. Cada tarjeta es un tenant con su grupo de Cognito. Entrar cambia el portal entero a
           esa organización.
         </p>
+        {metricsMissing ? (
+          <p className="mt-4 text-sm text-ink-soft">El resumen de cada organización todavía no está en el API.</p>
+        ) : null}
         {error ? <p className="mt-4 text-sm text-danger">{error}</p> : null}
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           {(rows ?? tenants.map((item) => ({ tenant: item, stats: null as DashboardStats | null }))).map((row) => {
@@ -75,9 +86,9 @@ export function TenantsPage() {
                   ) : null}
                 </div>
                 <dl className="mt-4 grid grid-cols-3 gap-2 text-center">
-                  <Metric label="Hilos" value={row.stats ? String(row.stats.conversationCount) : '…'} />
-                  <Metric label="Mensajes" value={row.stats ? String(row.stats.messagesThisWeek) : '…'} />
-                  <Metric label="Activos" value={row.stats ? String(row.stats.activeUsers) : '…'} />
+                  <Metric label="Hilos" value={metric(row.stats?.conversationCount, metricsMissing || rows !== null)} />
+                  <Metric label="Mensajes" value={metric(row.stats?.messagesThisWeek, metricsMissing || rows !== null)} />
+                  <Metric label="Activos" value={metric(row.stats?.activeUsers, metricsMissing || rows !== null)} />
                 </dl>
                 <p className="mt-4 text-xs text-ink-soft">
                   Grupo Cognito <code className="text-ink">{row.tenant.id}</code>
@@ -101,6 +112,11 @@ export function TenantsPage() {
       </div>
     </div>
   )
+}
+
+function metric(value: number | undefined, settled: boolean): string {
+  if (typeof value === 'number') return String(value)
+  return settled ? '—' : '…'
 }
 
 function Metric({ label, value }: { label: string; value: string }) {

@@ -1,5 +1,5 @@
 import type { Conversation, DashboardStats, DayActivity, Language } from '../api/types'
-import { DEMO_NOW, activityTime, dayKey, lastPreview, maskPhone } from './format'
+import { activityTime, dayKey, lastPreview, maskPhone } from './format'
 
 const WINDOW_DAYS = 7
 const CHART_DAYS = 14
@@ -12,7 +12,7 @@ function isoDay(date: Date): string {
   return dayKey(date.toISOString())
 }
 
-export function buildDashboard(conversations: Conversation[], now = DEMO_NOW): DashboardStats {
+export function buildDashboard(conversations: Conversation[], now = new Date()): DashboardStats {
   const end = isoDay(now)
   const windowStart = isoDay(addDays(now, -(WINDOW_DAYS - 1)))
   const chartStart = isoDay(addDays(now, -(CHART_DAYS - 1)))

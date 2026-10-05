@@ -2,16 +2,19 @@ import { useState, type FormEvent } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { COGNITO_AUTHORIZE_TEMPLATE, cognitoRedirectUri, startCognitoLogin } from '../auth/cognito'
 import { safeInternalPath } from '../lib/safeUrl'
+import { apiConfigured } from '../api'
 import { useAuth } from '../auth/AuthContext'
 import { Logo } from '../components/Logo'
 
 export function LoginPage() {
+  const usingApi = apiConfigured()
+  const showDemoForm = import.meta.env.DEV && !usingApi
   const { session, ready, login, accounts } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const from = safeInternalPath((location.state as { from?: unknown } | null)?.from)
-  const [email, setEmail] = useState('admin@example.com')
-  const [password, setPassword] = useState('demo')
+  const [email, setEmail] = useState(showDemoForm ? 'admin@example.com' : '')
+  const [password, setPassword] = useState(showDemoForm ? 'demo' : '')
   const [error, setError] = useState<string | null>(null)
   const [showCognito, setShowCognito] = useState(false)
 
@@ -78,9 +81,12 @@ export function LoginPage() {
           </div>
           <h2 className="font-display text-4xl">Entra al portal</h2>
           <p className="mt-2 text-ink-soft">
-            Pantalla visual. En producción este formulario lo sustituye Cognito Hosted UI.
+            {usingApi
+              ? 'El acceso es con Cognito. El formulario de demostración no se usa con el API.'
+              : 'Pantalla visual. En producción este formulario lo sustituye Cognito Hosted UI.'}
           </p>
 
+          {showDemoForm ? (
           <form onSubmit={onSubmit} className="mt-8 space-y-4">
             <label className="block">
               <span className="mb-1.5 block text-sm font-medium">Correo</span>
@@ -112,17 +118,22 @@ export function LoginPage() {
               Entrar
             </button>
           </form>
+          ) : null}
 
+          {usingApi && error ? <p className="mt-6 text-sm text-danger">{error}</p> : null}
+
+          {showDemoForm ? (
           <div className="my-5 flex items-center gap-3 text-xs tracking-wide text-ink-soft uppercase">
             <span className="h-px flex-1 bg-line" />
             o
             <span className="h-px flex-1 bg-line" />
           </div>
+          ) : null}
 
           <button
             type="button"
             onClick={onCognito}
-            className="w-full rounded-2xl border border-line bg-card py-3 font-semibold hover:border-moss"
+            className={`${usingApi ? 'mt-8 ' : ''}w-full rounded-2xl border border-line bg-card py-3 font-semibold hover:border-moss`}
           >
             Continuar con Cognito
           </button>
@@ -145,6 +156,7 @@ export function LoginPage() {
             </div>
           ) : null}
 
+          {showDemoForm ? (
           <div className="mt-8">
             <p className="text-xs tracking-[0.14em] text-ink-soft uppercase">Cuentas de demostración</p>
             <ul className="mt-3 space-y-2">
@@ -172,6 +184,7 @@ export function LoginPage() {
             </ul>
             <p className="mt-3 text-xs text-ink-soft">Contraseña de todas: demo. No sale de este navegador.</p>
           </div>
+          ) : null}
         </div>
       </section>
     </div>

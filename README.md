@@ -60,13 +60,15 @@ Then open [http://localhost:4173/admin/](http://localhost:4173/admin/).
 
 Recommended host: **Cloudflare Pages** at `admin.core-webhook.eu`, as its own project. Do not publish this app by copying a build over the marketing site.
 
+A production build fails unless `VITE_API_BASE`, `VITE_COGNITO_DOMAIN`, and `VITE_COGNITO_CLIENT_ID` are set. `.env.development` is only read by `npm run dev`. Set the same three variables on Cloudflare Pages. Without them the build stops, so a published bundle cannot fall back to the demo password.
+
 ```bash
 cd admin
-VITE_BASE=/ npm run build
+VITE_API_BASE=https://api.example VITE_COGNITO_DOMAIN=auth.example VITE_COGNITO_CLIENT_ID=client VITE_BASE=/ npm run build
 ```
 
 - Root directory: `admin`
-- Build command: `VITE_BASE=/ npm run build`
+- Build command: `VITE_API_BASE=… VITE_COGNITO_DOMAIN=… VITE_COGNITO_CLIENT_ID=… VITE_BASE=/ npm run build`
 - Output directory: `dist`
 - SPA fallback: `public/_redirects` (`/* /index.html 200`), copied into `dist`
 - Headers: `public/_headers`, also copied into `dist`
@@ -115,12 +117,8 @@ Base URL: `VITE_API_BASE`. Paths are defined in [`admin/src/api/endpoints.ts`](a
 | `GET` | `/tenants` | — | `TenantProfile[]` |
 | `GET` | `/tenants/{tenantId}` | — | `TenantProfile` |
 | `PATCH` | `/tenants/{tenantId}` | `{ systemPrompt, privacyPolicyUrl }` | updated `TenantProfile` |
-| `GET` | `/tenants/{tenantId}/dashboard` | — | `DashboardStats` for the demo window (conversation count, messages in 7 days, active users, topics, languages, daily activity, recent previews) |
-| `GET` | `/tenants/{tenantId}/conversations` | `q`, `language` (`es` \| `ca` \| `en`), `from`, `to` (`YYYY-MM-DD`), `includeAnonymized` | `Conversation[]` |
-| `GET` | `/tenants/{tenantId}/conversations/{conversationId}` | — | `Conversation` |
-| `GET` | `/tenants/{tenantId}/documents` | — | `KnowledgeDocument[]` |
-| `POST` | `/tenants/{tenantId}/documents` | `multipart/form-data` field `file` (pdf, md, txt) | `KnowledgeDocument` (`processing`, then `indexed` once chunked) |
-| `DELETE` | `/tenants/{tenantId}/documents/{documentId}` | — | `204` |
+
+Panel, conversaciones and documentos are not on the API. With `VITE_API_BASE` set, those screens say so and do not call the missing paths. The mock client still fills them when the variable is empty. The path helpers in `endpoints.ts` stay for that later contract.
 
 Shapes the UI already expects:
 

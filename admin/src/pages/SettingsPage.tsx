@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { apiConfigured } from '../api'
 import { useAdmin } from '../auth/AdminContext'
 import { safeNavigationUrl } from '../lib/safeUrl'
 import { tenantShortLabel, tenantTitle } from '../lib/tenantLabel'
@@ -42,7 +43,7 @@ export function SettingsPage() {
         privacyPolicyUrl: privacyUrl,
       })
       replaceTenant(updated)
-      setNotice('Guardado en esta demo. En producción actualizaría el TenantProfile.')
+      setNotice('Guardado.')
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : 'No se pudo guardar.')
     } finally {
@@ -51,8 +52,13 @@ export function SettingsPage() {
   }
 
   async function reset() {
-    await api.resetDemo()
-    window.location.reload()
+    setError(null)
+    try {
+      await api.resetDemo()
+      window.location.reload()
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'No se pudo restaurar la demo.')
+    }
   }
 
   return (
@@ -113,9 +119,11 @@ export function SettingsPage() {
             >
               {saving ? 'Guardando…' : 'Guardar'}
             </button>
-            <button type="button" onClick={() => void reset()} className="text-sm text-ink-soft underline">
-              Restaurar datos de demostración
-            </button>
+            {apiConfigured() ? null : (
+              <button type="button" onClick={() => void reset()} className="text-sm text-ink-soft underline">
+                Restaurar datos de demostración
+              </button>
+            )}
           </div>
         </div>
 

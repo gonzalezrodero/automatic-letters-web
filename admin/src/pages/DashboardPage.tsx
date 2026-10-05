@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { MessageCircle, MessagesSquare, Shield, Sparkles, Users } from 'lucide-react'
+import { isUnavailable } from '../api/errors'
 import type { DashboardStats } from '../api/types'
 import { useAuth } from '../auth/AuthContext'
 import { useAdmin } from '../auth/AdminContext'
 import { ActivityChart, LanguageMix, TopicBars } from '../components/Charts'
+import { NotReady } from '../components/NotReady'
 import { formatListTime, languageShort } from '../lib/format'
 import { tenantShortLabel } from '../lib/tenantLabel'
 
@@ -13,6 +15,7 @@ export function DashboardPage() {
   const { api, tenant } = useAdmin()
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [unavailable, setUnavailable] = useState(false)
 
   useEffect(() => {
     let cancel = false
@@ -23,12 +26,23 @@ export function DashboardPage() {
         if (!cancel) setStats(next)
       })
       .catch((reason: unknown) => {
-        if (!cancel) setError(reason instanceof Error ? reason.message : 'No se pudo cargar el panel.')
+        if (cancel) return
+        if (isUnavailable(reason)) setUnavailable(true)
+        else setError(reason instanceof Error ? reason.message : 'No se pudo cargar el panel.')
       })
     return () => {
       cancel = true
     }
   }, [api, tenant.id])
+
+  if (unavailable) {
+    return (
+      <NotReady
+        title="El panel todavía no está en el API"
+        detail="Organizaciones y ajustes sí. Conversaciones, documentos y el resumen semanal se añadirán cuando el API los tenga."
+      />
+    )
+  }
 
   return (
     <div className="h-full overflow-auto">
@@ -42,12 +56,9 @@ export function DashboardPage() {
               Hola, {session?.name.split(' ')[0]}
             </h1>
             <p className="mt-2 max-w-xl text-ink-soft">
-              Así ha hablado el bot de {tenantShortLabel(tenant)} con las familias. Los números salen de las conversaciones de demostración.
+              Así ha hablado el bot de {tenantShortLabel(tenant)} esta semana.
             </p>
           </div>
-          <span className="rounded-full bg-foam px-3 py-1 text-xs font-medium text-moss-deep">
-            Datos al 28 sep 2026
-          </span>
         </div>
 
         {error ? <p className="mt-6 text-sm text-danger">{error}</p> : null}

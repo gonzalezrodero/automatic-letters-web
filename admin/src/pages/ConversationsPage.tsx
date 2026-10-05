@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, Search, Shield } from 'lucide-react'
+import { isUnavailable } from '../api/errors'
 import type { Conversation, Language } from '../api/types'
 import { useAdmin } from '../auth/AdminContext'
 import { ChatThread } from '../components/ChatThread'
+import { NotReady } from '../components/NotReady'
 import {
   activityTime,
   cn,
@@ -29,6 +31,7 @@ export function ConversationsPage() {
   const [draft, setDraft] = useState(q)
   const [rows, setRows] = useState<Conversation[] | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [unavailable, setUnavailable] = useState(false)
 
   useEffect(() => {
     setDraft(q)
@@ -66,7 +69,9 @@ export function ConversationsPage() {
         if (!cancel) setRows(list)
       })
       .catch((reason: unknown) => {
-        if (!cancel) setError(reason instanceof Error ? reason.message : 'No se pudieron cargar.')
+        if (cancel) return
+        if (isUnavailable(reason)) setUnavailable(true)
+        else setError(reason instanceof Error ? reason.message : 'No se pudieron cargar.')
       })
     return () => {
       cancel = true
@@ -82,6 +87,15 @@ export function ConversationsPage() {
       }
       return next
     })
+  }
+
+  if (unavailable) {
+    return (
+      <NotReady
+        title="Las conversaciones todavía no están en el API"
+        detail="El listado y el hilo se mostrarán cuando el API los tenga. Organizaciones y ajustes ya funcionan."
+      />
+    )
   }
 
   return (

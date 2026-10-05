@@ -17,14 +17,16 @@ interface Account {
   groups: string[]
 }
 
-const ACCOUNTS: Account[] = [
-  {
-    email: 'admin@example.com',
-    password: 'demo',
-    name: 'Admin',
-    groups: ['admin'],
-  },
-]
+const ACCOUNTS: Account[] = import.meta.env.DEV
+  ? [
+      {
+        email: 'admin@example.com',
+        password: 'demo',
+        name: 'Admin',
+        groups: ['admin'],
+      },
+    ]
+  : []
 
 const STORAGE_KEY = 'al.session'
 
@@ -106,6 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       accounts,
       login(email, password) {
         if (base) return 'Con el API configurado el acceso es solo con Cognito.'
+        if (!import.meta.env.DEV) return 'Este portal no tiene el API configurado.'
         const account = ACCOUNTS.find((item) => item.email.toLowerCase() === email.trim().toLowerCase())
         if (!account) return 'No reconocemos esta cuenta de demostración.'
         if (account.password !== password) return 'Contraseña incorrecta. En la demo es «demo».'

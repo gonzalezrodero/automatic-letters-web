@@ -1,8 +1,5 @@
 import type { Conversation, ConversationEvent, Language } from '../api/types'
 
-/** Fixed clock so the September 2026 demo stays populated whenever it is opened. */
-export const DEMO_NOW = new Date('2026-09-28T18:30:00+02:00')
-
 const MADRID = 'Europe/Madrid'
 
 export function maskPhone(e164: string): string {
@@ -51,9 +48,9 @@ export function formatTime(iso: string): string {
   }).format(new Date(iso))
 }
 
-export function formatDayHeading(isoDay: string): string {
-  const today = madridParts(DEMO_NOW)
-  const yesterday = madridParts(new Date(DEMO_NOW.getTime() - 24 * 60 * 60 * 1000))
+export function formatDayHeading(isoDay: string, now = new Date()): string {
+  const today = madridParts(now)
+  const yesterday = madridParts(new Date(now.getTime() - 24 * 60 * 60 * 1000))
   if (isoDay === today) return 'Hoy'
   if (isoDay === yesterday) return 'Ayer'
   const date = new Date(`${isoDay}T12:00:00+02:00`)
@@ -64,10 +61,10 @@ export function formatDayHeading(isoDay: string): string {
   }).format(date)
 }
 
-export function formatListTime(iso: string): string {
+export function formatListTime(iso: string, now = new Date()): string {
   const key = dayKey(iso)
-  const today = madridParts(DEMO_NOW)
-  const yesterday = madridParts(new Date(DEMO_NOW.getTime() - 24 * 60 * 60 * 1000))
+  const today = madridParts(now)
+  const yesterday = madridParts(new Date(now.getTime() - 24 * 60 * 60 * 1000))
   const time = formatTime(iso)
   if (key === today) return `hoy, ${time}`
   if (key === yesterday) return `ayer, ${time}`

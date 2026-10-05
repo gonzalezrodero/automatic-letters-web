@@ -47,6 +47,14 @@ function redirectRootToBase(base: string): Plugin {
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
+  if (mode === 'production') {
+    const missing = ['VITE_API_BASE', 'VITE_COGNITO_DOMAIN', 'VITE_COGNITO_CLIENT_ID'].filter(
+      (key) => !env[key]?.trim(),
+    )
+    if (missing.length > 0) {
+      throw new Error(`Production build requires ${missing.join(', ')}.`)
+    }
+  }
   const base = env.VITE_BASE || '/admin/'
 
   return {

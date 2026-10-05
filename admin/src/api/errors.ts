@@ -1,3 +1,15 @@
+/** The HTTP API does not implement this screen yet. Mock mode still does. */
+export class UnavailableApiError extends Error {
+  constructor() {
+    super('Esta pantalla todavía no está en el API.')
+    this.name = 'UnavailableApiError'
+  }
+}
+
+export function isUnavailable(reason: unknown): reason is UnavailableApiError {
+  return reason instanceof UnavailableApiError
+}
+
 /** Fixed copy per status. The response body is never returned to the UI. */
 export function messageForStatus(status: number): string {
   if (status === 401) return 'La sesión ha caducado. Vuelve a entrar.'

@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { FileText, Trash2, Upload } from 'lucide-react'
+import { isUnavailable } from '../api/errors'
 import type { KnowledgeDocument } from '../api/types'
 import { useAdmin } from '../auth/AdminContext'
+import { NotReady } from '../components/NotReady'
 import { formatBytes, formatListTime } from '../lib/format'
 import { tenantShortLabel } from '../lib/tenantLabel'
 
@@ -10,6 +12,7 @@ export function KnowledgePage() {
   const inputRef = useRef<HTMLInputElement>(null)
   const [documents, setDocuments] = useState<KnowledgeDocument[] | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [unavailable, setUnavailable] = useState(false)
   const [dragging, setDragging] = useState(false)
   const [pendingDelete, setPendingDelete] = useState<string | null>(null)
 
@@ -28,7 +31,9 @@ export function KnowledgePage() {
         if (!cancel) setDocuments(list)
       })
       .catch((reason: unknown) => {
-        if (!cancel) setError(reason instanceof Error ? reason.message : 'No se pudo cargar.')
+        if (cancel) return
+        if (isUnavailable(reason)) setUnavailable(true)
+        else setError(reason instanceof Error ? reason.message : 'No se pudo cargar.')
       })
     return () => {
       cancel = true
@@ -51,6 +56,15 @@ export function KnowledgePage() {
         void refresh()
       }, 1100)
     }
+  }
+
+  if (unavailable) {
+    return (
+      <NotReady
+        title="Los documentos todavía no están en el API"
+        detail="La subida y el listado se conectarán cuando el API los tenga."
+      />
+    )
   }
 
   return (
