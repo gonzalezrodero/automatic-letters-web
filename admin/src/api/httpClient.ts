@@ -1,7 +1,8 @@
 import { getCredential } from '../auth/credentials'
 import { endpoints } from './endpoints'
-import { UnavailableApiError, publicApiError } from './errors'
-import type { AdminApi, TenantProfile, TenantSettingsPatch } from './types'
+import { publicApiError } from './errors'
+import { conversationSearchParams } from './query'
+import type { AdminApi, Conversation, DashboardStats, KnowledgeDocument, TenantProfile, TenantSettingsPatch } from './types'
 
 const MISSING_SESSION = 'No hay sesión con el API. Entra con Cognito.'
 
@@ -61,23 +62,26 @@ export function createHttpAdminApi(baseUrl: string): AdminApi {
         body: JSON.stringify(patch),
       })
     },
-    getDashboard() {
-      return Promise.reject(new UnavailableApiError())
+    getDashboard(tenantId) {
+      return request<DashboardStats>(endpoints.dashboard(tenantId))
     },
-    listConversations() {
-      return Promise.reject(new UnavailableApiError())
+    listConversations(tenantId, query) {
+      const params = conversationSearchParams(query)
+      return request<Conversation[]>(`${endpoints.conversations(tenantId)}?${params}`)
     },
-    getConversation() {
-      return Promise.reject(new UnavailableApiError())
+    getConversation(tenantId, conversationId) {
+      return request<Conversation>(endpoints.conversation(tenantId, conversationId))
     },
-    listDocuments() {
-      return Promise.reject(new UnavailableApiError())
+    listDocuments(tenantId) {
+      return request<KnowledgeDocument[]>(endpoints.documents(tenantId))
     },
-    uploadDocument() {
-      return Promise.reject(new UnavailableApiError())
+    uploadDocument(tenantId, file) {
+      const body = new FormData()
+      body.append('file', file)
+      return request<KnowledgeDocument>(endpoints.documents(tenantId), { method: 'POST', body })
     },
-    deleteDocument() {
-      return Promise.reject(new UnavailableApiError())
+    deleteDocument(tenantId, documentId) {
+      return request<void>(endpoints.document(tenantId, documentId), { method: 'DELETE' })
     },
     async resetDemo() {
       throw new Error('Restablecer la demo solo existe en el cliente simulado.')

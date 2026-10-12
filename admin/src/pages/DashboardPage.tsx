@@ -145,9 +145,11 @@ export function DashboardPage() {
                     <span className="min-w-0">
                       <span className="flex items-center gap-2">
                         <span className="font-medium">{item.anonymized ? 'Usuario anonimizado' : item.phoneMasked}</span>
-                        <span className="rounded-full bg-sand px-2 py-0.5 text-[11px] font-semibold">
-                          {languageShort(item.language)}
-                        </span>
+                        {languageShort(item.language) ? (
+                          <span className="rounded-full bg-sand px-2 py-0.5 text-[11px] font-semibold">
+                            {languageShort(item.language)}
+                          </span>
+                        ) : null}
                       </span>
                       <span className="mt-0.5 block text-sm text-ink-soft">{item.topic}</span>
                       <span className="mt-1 block truncate text-sm">{item.preview}</span>

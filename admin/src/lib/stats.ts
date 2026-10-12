@@ -40,7 +40,9 @@ export function buildDashboard(conversations: Conversation[], now = new Date()):
       deletionRequests += 1
       continue
     }
-    languageMap.set(conversation.language, (languageMap.get(conversation.language) ?? 0) + 1)
+    if (conversation.language) {
+      languageMap.set(conversation.language, (languageMap.get(conversation.language) ?? 0) + 1)
+    }
 
     for (const event of conversation.events) {
       const key = dayKey(event.at)
