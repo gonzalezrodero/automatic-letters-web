@@ -73,7 +73,7 @@ VITE_API_BASE=https://api.example VITE_COGNITO_DOMAIN=auth.example VITE_COGNITO_
 - SPA fallback: `public/_redirects` (`/* /index.html 200`), copied into `dist`
 - Headers: `public/_headers`, also copied into `dist`
 
-`_headers` sends a Content-Security-Policy that matches this app: scripts and styles from `'self'`, Google Fonts (`fonts.googleapis.com` / `fonts.gstatic.com`), `style-src-attr 'unsafe-inline'` because the charts set `style` on elements, `connect-src` for `https://api.core-webhook.eu`, and `frame-ancestors 'none'`. `frame-ancestors` only works as an HTTP header, which is why this deploy is preferred over GitHub Pages. If the API origin changes, edit `connect-src` in `admin/public/_headers`.
+`_headers` sends a Content-Security-Policy that matches this app: scripts and styles from `'self'`, Google Fonts (`fonts.googleapis.com` / `fonts.gstatic.com`), `style-src-attr 'unsafe-inline'` because the charts set `style` on elements, `connect-src` for `https://api.core-webhook.eu` and `https://api.dev.core-webhook.eu`, and `frame-ancestors 'none'`. `frame-ancestors` only works as an HTTP header, which is why this deploy is preferred over GitHub Pages. If the API origin changes, edit `connect-src` in `admin/public/_headers`.
 
 Cognito redirect URI: `https://admin.core-webhook.eu/auth/callback`. Logout URI: `https://admin.core-webhook.eu/login`.
 
