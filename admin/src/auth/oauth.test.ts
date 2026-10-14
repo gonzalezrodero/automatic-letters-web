@@ -5,7 +5,9 @@ import {
   buildLogoutUrl,
   consumeOAuthRequest,
   createCodeChallenge,
+  markCognitoRelogin,
   rememberOAuthRequest,
+  takeCognitoRelogin,
   stripAuthParams,
   takeOAuthCallback,
   type OAuthStorage,
@@ -66,6 +68,16 @@ describe('authorize and logout urls', () => {
     expect(logout.pathname).toBe('/logout')
     expect(logout.searchParams.get('logout_uri')).toBe('https://admin.core-webhook.eu/login')
     expect(logout.searchParams.get('client_id')).toBe('abc')
+  })
+})
+
+describe('cognito relogin', () => {
+  it('remembers one fresh login and then forgets it', () => {
+    const storage = memoryStorage()
+    expect(takeCognitoRelogin(storage)).toBe(false)
+    markCognitoRelogin(storage)
+    expect(takeCognitoRelogin(storage)).toBe(true)
+    expect(takeCognitoRelogin(storage)).toBe(false)
   })
 })
 
