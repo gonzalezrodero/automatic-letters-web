@@ -1,6 +1,6 @@
 import { resourceSegment } from './ids'
 
-/** Live paths plus the later panel, conversation, and document contract. The HTTP client only calls the live ones. */
+/** Paths the portal calls on the .NET API. */
 export const endpoints = {
   me: '/me',
   token: '/auth/token',

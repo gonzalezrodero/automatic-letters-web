@@ -15,14 +15,15 @@ export function maskPhone(e164: string): string {
   return `+${cc} ${rest.slice(0, 2)}** *** *${rest.slice(-2)}`
 }
 
-export function languageLabel(language: Language): string {
+export function languageLabel(language: Language | null): string {
   if (language === 'es') return 'Español'
   if (language === 'ca') return 'Català'
-  return 'English'
+  if (language === 'en') return 'English'
+  return ''
 }
 
-export function languageShort(language: Language): string {
-  return language.toUpperCase()
+export function languageShort(language: Language | null): string {
+  return language ? language.toUpperCase() : ''
 }
 
 function madridParts(date: Date) {

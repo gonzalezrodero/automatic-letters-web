@@ -21,7 +21,8 @@ export interface Conversation {
   tenantId: string
   /** E.164. Empty once a GDPR deletion has anonymized the thread. */
   userPhone: string
-  language: Language
+  /** Null when the bot has not classified the thread. */
+  language: Language | null
   topic: string
   anonymized: boolean
   deletionRequestedAt?: string
@@ -69,7 +70,7 @@ export interface LanguageCount {
 export interface ConversationPreview {
   id: string
   topic: string
-  language: Language
+  language: Language | null
   preview: string
   at: string
   anonymized: boolean

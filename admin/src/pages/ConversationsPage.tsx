@@ -186,9 +186,11 @@ export function ConversationsPage() {
                       </time>
                     </span>
                     <span className="mt-1 flex items-center gap-2">
-                      <span className="rounded-full bg-sand px-2 py-0.5 text-[10px] font-semibold">
-                        {languageShort(conversation.language)}
-                      </span>
+                      {languageShort(conversation.language) ? (
+                        <span className="rounded-full bg-sand px-2 py-0.5 text-[10px] font-semibold">
+                          {languageShort(conversation.language)}
+                        </span>
+                      ) : null}
                       <span className="truncate text-xs text-ink-soft">{conversation.topic}</span>
                     </span>
                     <span className="mt-1 line-clamp-2 block text-sm text-ink/80">{lastPreview(conversation)}</span>
@@ -259,7 +261,7 @@ function ConversationPane({ conversationId, onBack }: { conversationId: string; 
               {conversation.anonymized ? 'Usuario anonimizado' : maskPhone(conversation.userPhone)}
             </p>
             <p className="truncate text-xs text-ink-soft">
-              {languageLabel(conversation.language)} · {conversation.topic}
+              {[languageLabel(conversation.language), conversation.topic].filter(Boolean).join(' · ')}
               {conversation.anonymized ? ' · GDPR' : ''}
             </p>
           </div>

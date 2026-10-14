@@ -72,8 +72,8 @@ export function KnowledgePage() {
       <div className="mx-auto max-w-4xl px-4 py-6 sm:px-8 sm:py-8">
         <h1 className="font-display text-4xl">Conocimiento</h1>
         <p className="mt-2 max-w-2xl text-ink-soft">
-          Documentos que el bot de {tenantShortLabel(tenant)} trocea para responder. La subida de esta demo no llama al
-          servidor: marca el archivo como indexado al cabo de un momento.
+          Documentos que el bot de {tenantShortLabel(tenant)} trocea para responder. La subida envía el archivo al
+          API y queda indexado para ese tenant.
         </p>
 
         <button
