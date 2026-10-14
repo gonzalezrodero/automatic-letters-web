@@ -6,7 +6,6 @@ const thread: Conversation = {
   id: 'thread-01',
   tenantId: 'example-tenant',
   userPhone: '+34611223301',
-  language: 'ca',
   topic: 'Inscripció',
   anonymized: false,
   events: [],

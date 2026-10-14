@@ -1,5 +1,4 @@
-import type { DayActivity, LanguageCount, TopicCount } from '../api/types'
-import { languageLabel } from '../lib/format'
+import type { DayActivity, TopicCount } from '../api/types'
 
 export function ActivityChart({ days }: { days: DayActivity[] }) {
   const width = 640
@@ -72,36 +71,5 @@ export function TopicBars({ topics }: { topics: TopicCount[] }) {
         </li>
       ))}
     </ul>
-  )
-}
-
-export function LanguageMix({ languages }: { languages: LanguageCount[] }) {
-  const total = languages.reduce((sum, item) => sum + item.count, 0) || 1
-  const colors: Record<string, string> = { es: '#0f7a45', ca: '#c9842a', en: '#1f6f8a' }
-  return (
-    <div>
-      <div className="flex h-3 overflow-hidden rounded-full bg-sand">
-        {languages.map((item) => (
-          <div
-            key={item.language}
-            style={{ width: `${(item.count / total) * 100}%`, background: colors[item.language] }}
-            title={`${languageLabel(item.language)}: ${item.count}`}
-          />
-        ))}
-      </div>
-      <ul className="mt-4 space-y-2">
-        {languages.map((item) => (
-          <li key={item.language} className="flex items-center justify-between text-sm">
-            <span className="flex items-center gap-2">
-              <span className="h-2.5 w-2.5 rounded-full" style={{ background: colors[item.language] }} />
-              {languageLabel(item.language)}
-            </span>
-            <span className="tabular-nums text-ink-soft">
-              {item.count} · {Math.round((item.count / total) * 100)}%
-            </span>
-          </li>
-        ))}
-      </ul>
-    </div>
   )
 }

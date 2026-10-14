@@ -1,4 +1,4 @@
-import type { Conversation, ConversationEvent, Language } from '../api/types'
+import type { Conversation, ConversationEvent } from '../api/types'
 
 const MADRID = 'Europe/Madrid'
 
@@ -13,17 +13,6 @@ export function maskPhone(e164: string): string {
   const rest = digits.slice(cc.length)
   if (rest.length < 4) return `+${cc} ***`
   return `+${cc} ${rest.slice(0, 2)}** *** *${rest.slice(-2)}`
-}
-
-export function languageLabel(language: Language | null): string {
-  if (language === 'es') return 'Español'
-  if (language === 'ca') return 'Català'
-  if (language === 'en') return 'English'
-  return ''
-}
-
-export function languageShort(language: Language | null): string {
-  return language ? language.toUpperCase() : ''
 }
 
 function madridParts(date: Date) {

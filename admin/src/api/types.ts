@@ -1,5 +1,3 @@
-export type Language = 'es' | 'ca' | 'en'
-
 export type ConversationEvent =
   | { type: 'MessageReceived'; text: string; at: string }
   | { type: 'ReplyGenerated'; text: string; at: string }
@@ -21,8 +19,6 @@ export interface Conversation {
   tenantId: string
   /** E.164. Empty once a GDPR deletion has anonymized the thread. */
   userPhone: string
-  /** Null when the bot has not classified the thread. */
-  language: Language | null
   topic: string
   anonymized: boolean
   deletionRequestedAt?: string
@@ -31,7 +27,6 @@ export interface Conversation {
 
 export interface ConversationQuery {
   q?: string
-  language?: Language | 'all'
   from?: string
   to?: string
   includeAnonymized?: boolean
@@ -62,15 +57,9 @@ export interface TopicCount {
   count: number
 }
 
-export interface LanguageCount {
-  language: Language
-  count: number
-}
-
 export interface ConversationPreview {
   id: string
   topic: string
-  language: Language | null
   preview: string
   at: string
   anonymized: boolean
@@ -86,7 +75,6 @@ export interface DashboardStats {
   deletionRequests: number
   topTopic: TopicCount | null
   topics: TopicCount[]
-  languages: LanguageCount[]
   activity: DayActivity[]
   recent: ConversationPreview[]
 }
