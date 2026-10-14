@@ -6,6 +6,7 @@ export interface OAuthStorage {
 
 export const OAUTH_STATE_KEY = 'al.oauth.state'
 export const OAUTH_VERIFIER_KEY = 'al.oauth.verifier'
+export const OAUTH_RESUME_KEY = 'al.oauth.resume'
 
 const STATE_BYTES = 32
 const VERIFIER_BYTES = 32
@@ -49,6 +50,18 @@ export function consumeOAuthRequest(storage: OAuthStorage, state: string | null)
 export function clearOAuthRequest(storage: OAuthStorage): void {
   storage.removeItem(OAUTH_STATE_KEY)
   storage.removeItem(OAUTH_VERIFIER_KEY)
+}
+
+/** Remember that the next visit to the login page should open a fresh authorize request. */
+export function markCognitoRelogin(storage: OAuthStorage): void {
+  storage.setItem(OAUTH_RESUME_KEY, '1')
+}
+
+/** True once, then the flag is gone. Safe if the login page effect runs twice. */
+export function takeCognitoRelogin(storage: OAuthStorage): boolean {
+  const pending = storage.getItem(OAUTH_RESUME_KEY) === '1'
+  if (pending) storage.removeItem(OAUTH_RESUME_KEY)
+  return pending
 }
 
 export function buildAuthorizeUrl(input: {

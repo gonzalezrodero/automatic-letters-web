@@ -1,6 +1,7 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
-import { COGNITO_AUTHORIZE_TEMPLATE, cognitoRedirectUri, startCognitoLogin } from '../auth/cognito'
+import { COGNITO_AUTHORIZE_TEMPLATE, cognitoLogoutUrl, cognitoRedirectUri, startCognitoLogin } from '../auth/cognito'
+import { markCognitoRelogin, takeCognitoRelogin } from '../auth/oauth'
 import { safeInternalPath } from '../lib/safeUrl'
 import { apiConfigured } from '../api'
 import { useAuth } from '../auth/AuthContext'
@@ -17,6 +18,28 @@ export function LoginPage() {
   const [password, setPassword] = useState(showDemoForm ? 'demo' : '')
   const [error, setError] = useState<string | null>(null)
   const [showCognito, setShowCognito] = useState(false)
+  const [restarting, setRestarting] = useState(false)
+
+  useEffect(() => {
+    if (!ready || session || !usingApi) return
+    if (!takeCognitoRelogin(sessionStorage)) return
+    setRestarting(true)
+    void (async () => {
+      try {
+        const url = await startCognitoLogin()
+        if (!url) {
+          setRestarting(false)
+          setShowCognito(true)
+          return
+        }
+        window.location.assign(url)
+      } catch (reason) {
+        console.error(reason)
+        setRestarting(false)
+        setError('No se pudo iniciar el acceso con Cognito.')
+      }
+    })()
+  }, [ready, session, usingApi])
 
   if (!ready) {
     return (
@@ -39,6 +62,12 @@ export function LoginPage() {
   }
 
   async function onCognito() {
+    const logout = cognitoLogoutUrl()
+    if (logout) {
+      markCognitoRelogin(sessionStorage)
+      window.location.assign(logout)
+      return
+    }
     try {
       const url = await startCognitoLogin()
       if (!url) {
@@ -133,9 +162,10 @@ export function LoginPage() {
           <button
             type="button"
             onClick={onCognito}
-            className={`${usingApi ? 'mt-8 ' : ''}w-full rounded-2xl border border-line bg-card py-3 font-semibold hover:border-moss`}
+            disabled={restarting}
+            className={`${usingApi ? 'mt-8 ' : ''}w-full rounded-2xl border border-line bg-card py-3 font-semibold hover:border-moss disabled:opacity-60`}
           >
-            Continuar con Cognito
+            {restarting ? 'Abriendo el acceso…' : 'Continuar con Cognito'}
           </button>
 
           {showCognito ? (
