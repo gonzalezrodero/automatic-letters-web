@@ -21,7 +21,7 @@ export function LoginPage() {
   const [restarting, setRestarting] = useState(false)
 
   useEffect(() => {
-    if (!ready || session || !usingApi) return
+    if (!ready || session) return
     if (!takeCognitoRelogin(sessionStorage)) return
     setRestarting(true)
     void (async () => {
@@ -39,7 +39,7 @@ export function LoginPage() {
         setError('No se pudo iniciar el acceso con Cognito.')
       }
     })()
-  }, [ready, session, usingApi])
+  }, [ready, session])
 
   if (!ready) {
     return (
