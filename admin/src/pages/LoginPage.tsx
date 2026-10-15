@@ -1,7 +1,13 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
-import { COGNITO_AUTHORIZE_TEMPLATE, cognitoLogoutUrl, cognitoRedirectUri, startCognitoLogin } from '../auth/cognito'
-import { markCognitoRelogin, takeCognitoRelogin } from '../auth/oauth'
+import {
+  COGNITO_AUTHORIZE_TEMPLATE,
+  cognitoConfigured,
+  cognitoLogoutUrl,
+  cognitoRedirectUri,
+  startCognitoLogin,
+} from '../auth/cognito'
+import { decideCognitoResume, markCognitoRelogin } from '../auth/oauth'
 import { safeInternalPath } from '../lib/safeUrl'
 import { apiConfigured } from '../api'
 import { useAuth } from '../auth/AuthContext'
@@ -21,8 +27,18 @@ export function LoginPage() {
   const [restarting, setRestarting] = useState(false)
 
   useEffect(() => {
-    if (!ready || session) return
-    if (!takeCognitoRelogin(sessionStorage)) return
+    const decision = decideCognitoResume({
+      storage: sessionStorage,
+      ready,
+      signedIn: session != null,
+      cognitoConfigured: cognitoConfigured(),
+      apiBase: import.meta.env.VITE_API_BASE?.trim() ?? '',
+    })
+    if (decision === 'skip') return
+    if (decision === 'unconfigured') {
+      setShowCognito(true)
+      return
+    }
     setRestarting(true)
     void (async () => {
       try {

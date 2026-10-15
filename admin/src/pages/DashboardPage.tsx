@@ -5,9 +5,9 @@ import { isUnavailable } from '../api/errors'
 import type { DashboardStats } from '../api/types'
 import { useAuth } from '../auth/AuthContext'
 import { useAdmin } from '../auth/AdminContext'
-import { ActivityChart, LanguageMix, TopicBars } from '../components/Charts'
+import { ActivityChart, TopicBars } from '../components/Charts'
 import { NotReady } from '../components/NotReady'
-import { formatListTime, languageShort } from '../lib/format'
+import { formatListTime } from '../lib/format'
 import { tenantShortLabel } from '../lib/tenantLabel'
 
 export function DashboardPage() {
@@ -115,17 +115,21 @@ export function DashboardPage() {
 
         <section className="mt-4 grid gap-4 lg:grid-cols-5">
           <article className="rounded-3xl border border-line bg-card p-5 lg:col-span-2">
-            <h2 className="font-display text-2xl">Idiomas</h2>
-            <p className="mt-1 mb-4 text-sm text-ink-soft">Catalán, castellano e inglés.</p>
-            {stats ? <LanguageMix languages={stats.languages} /> : null}
-            {stats && stats.deletionRequests > 0 ? (
-              <p className="mt-5 flex items-start gap-2 rounded-2xl bg-sand px-3 py-3 text-sm">
-                <Shield className="mt-0.5 h-4 w-4 shrink-0 text-moss-deep" />
-                <span>
-                  {stats.deletionRequests} solicitud{stats.deletionRequests === 1 ? '' : 'es'} de borrado. El
-                  teléfono y el historial ya no están en el hilo.
-                </span>
-              </p>
+            <h2 className="font-display text-2xl">Solicitudes de borrado</h2>
+            {stats ? (
+              <>
+                <p className="mt-3 font-display text-3xl tracking-tight">
+                  {deletionRequestLabel(stats.deletionRequests)}
+                </p>
+                <p className="mt-4 flex items-start gap-2 rounded-2xl bg-sand px-3 py-3 text-sm">
+                  <Shield className="mt-0.5 h-4 w-4 shrink-0 text-moss-deep" />
+                  <span>
+                    {stats.deletionRequests === 0
+                      ? 'No hay solicitudes de borrado en esta ventana.'
+                      : 'El teléfono y el historial ya no están en el hilo.'}
+                  </span>
+                </p>
+              </>
             ) : null}
           </article>
           <article className="rounded-3xl border border-line bg-card p-5 lg:col-span-3">
@@ -143,13 +147,8 @@ export function DashboardPage() {
                     className="flex items-start justify-between gap-4 py-3 hover:bg-paper/80"
                   >
                     <span className="min-w-0">
-                      <span className="flex items-center gap-2">
-                        <span className="font-medium">{item.anonymized ? 'Usuario anonimizado' : item.phoneMasked}</span>
-                        {languageShort(item.language) ? (
-                          <span className="rounded-full bg-sand px-2 py-0.5 text-[11px] font-semibold">
-                            {languageShort(item.language)}
-                          </span>
-                        ) : null}
+                      <span className="block font-medium">
+                        {item.anonymized ? 'Usuario anonimizado' : item.phoneMasked}
                       </span>
                       <span className="mt-0.5 block text-sm text-ink-soft">{item.topic}</span>
                       <span className="mt-1 block truncate text-sm">{item.preview}</span>
@@ -166,6 +165,11 @@ export function DashboardPage() {
       </div>
     </div>
   )
+}
+
+function deletionRequestLabel(count: number): string {
+  if (count === 1) return '1 solicitud de borrado'
+  return `${count} solicitudes de borrado`
 }
 
 function Stat({

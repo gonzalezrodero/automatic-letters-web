@@ -5,6 +5,7 @@ import {
   buildLogoutUrl,
   consumeOAuthRequest,
   createCodeChallenge,
+  decideCognitoResume,
   markCognitoRelogin,
   rememberOAuthRequest,
   takeCognitoRelogin,
@@ -78,6 +79,48 @@ describe('cognito relogin', () => {
     markCognitoRelogin(storage)
     expect(takeCognitoRelogin(storage)).toBe(true)
     expect(takeCognitoRelogin(storage)).toBe(false)
+  })
+
+  it('consumes the flag and resumes when Cognito is configured, including an empty API base', () => {
+    const storage = memoryStorage()
+    markCognitoRelogin(storage)
+    expect(
+      decideCognitoResume({
+        storage,
+        ready: true,
+        signedIn: false,
+        cognitoConfigured: true,
+        apiBase: '',
+      }),
+    ).toBe('resume')
+    expect(takeCognitoRelogin(storage)).toBe(false)
+
+    const withApi = memoryStorage()
+    markCognitoRelogin(withApi)
+    expect(
+      decideCognitoResume({
+        storage: withApi,
+        ready: true,
+        signedIn: false,
+        cognitoConfigured: true,
+        apiBase: 'https://api.example',
+      }),
+    ).toBe('resume')
+  })
+
+  it('does not resume before the page is ready, and keeps the flag', () => {
+    const storage = memoryStorage()
+    markCognitoRelogin(storage)
+    expect(
+      decideCognitoResume({
+        storage,
+        ready: false,
+        signedIn: false,
+        cognitoConfigured: true,
+        apiBase: '',
+      }),
+    ).toBe('skip')
+    expect(takeCognitoRelogin(storage)).toBe(true)
   })
 })
 

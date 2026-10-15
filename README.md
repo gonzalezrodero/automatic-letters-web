@@ -77,14 +77,14 @@ VITE_API_BASE=https://api.example VITE_COGNITO_DOMAIN=auth.example VITE_COGNITO_
 
 Cognito redirect URI: `https://admin.core-webhook.eu/auth/callback`. Logout URI: `https://admin.core-webhook.eu/login`.
 
-The build also writes `dist/404.html` (a copy of `index.html`) for hosts that use a 404 document as the SPA fallback.
+The build does not emit `dist/404.html`. Cloudflare Pages would serve that file for `/auth/callback` and `/login` with HTTP 404, which breaks Cognito. `public/_redirects` (`/* /index.html 200`) is the SPA fallback and returns 200.
 
 **Subfolder** (`www.core-webhook.eu/admin/`), only if you cannot use the subdomain:
 
 1. `cd admin && npm run build` (default `VITE_BASE=/admin/`).
 2. Publish the **contents** of `admin/dist` at the `/admin/` path.
 3. Never replace the repository-root `index.html`, `privacy.html`, `data-deletion.html`, or `CNAME`. Those files are the public site. Do not copy `dist/index.html` onto them.
-4. Add a fallback so `/admin/*` serves `/admin/index.html` (Cloudflare rule or the emitted `404.html`, depending on the host).
+4. Add a fallback so `/admin/*` serves `/admin/index.html` with HTTP 200. Do not use a 404 document for that rewrite.
 
 GitHub Pages serving the branch root will show the Vite **source** `admin/index.html`, which does not run. It also cannot set the CSP above. Publish `admin/dist` on a host that can, not the source tree.
 

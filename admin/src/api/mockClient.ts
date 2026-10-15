@@ -43,16 +43,12 @@ export function searchablePhone(userPhone: string): string {
 
 export function matchesQuery(conversation: Conversation, query: ConversationQuery): boolean {
   if (query.includeAnonymized === false && conversation.anonymized) return false
-  if (query.language && query.language !== 'all' && conversation.language !== query.language) {
-    return false
-  }
   const when = activityTime(conversation)
   if (when && !inDateRange(when, query.from, query.to)) return false
   const q = query.q?.trim().toLowerCase()
   if (!q) return true
   const haystack = [
     conversation.topic,
-    conversation.language,
     conversation.anonymized
       ? 'anonimizado borrado gdpr número eliminado'
       : `${maskPhone(conversation.userPhone)} ${searchablePhone(conversation.userPhone)}`,

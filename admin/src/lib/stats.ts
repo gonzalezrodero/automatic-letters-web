@@ -1,4 +1,4 @@
-import type { Conversation, DashboardStats, DayActivity, Language } from '../api/types'
+import type { Conversation, DashboardStats, DayActivity } from '../api/types'
 import { activityTime, dayKey, lastPreview, maskPhone } from './format'
 
 const WINDOW_DAYS = 7
@@ -30,7 +30,6 @@ export function buildDashboard(conversations: Conversation[], now = new Date()):
   }
 
   const topicMap = new Map<string, { count: number; latest: string }>()
-  const languageMap = new Map<Language, number>()
   const activePhones = new Set<string>()
   let messagesThisWeek = 0
   let deletionRequests = 0
@@ -39,9 +38,6 @@ export function buildDashboard(conversations: Conversation[], now = new Date()):
     if (conversation.anonymized) {
       deletionRequests += 1
       continue
-    }
-    if (conversation.language) {
-      languageMap.set(conversation.language, (languageMap.get(conversation.language) ?? 0) + 1)
     }
 
     for (const event of conversation.events) {
@@ -70,17 +66,12 @@ export function buildDashboard(conversations: Conversation[], now = new Date()):
     .sort((a, b) => b[1].count - a[1].count || b[1].latest.localeCompare(a[1].latest))
     .map(([topic, info]) => ({ topic, count: info.count }))
 
-  const languages = (['es', 'ca', 'en'] as const)
-    .map((language) => ({ language, count: languageMap.get(language) ?? 0 }))
-    .filter((item) => item.count > 0)
-
   const recent = [...conversations]
     .sort((a, b) => activityTime(b).localeCompare(activityTime(a)))
     .slice(0, 4)
     .map((conversation) => ({
       id: conversation.id,
       topic: conversation.topic,
-      language: conversation.language,
       preview: lastPreview(conversation),
       at: activityTime(conversation),
       anonymized: conversation.anonymized,
@@ -99,7 +90,6 @@ export function buildDashboard(conversations: Conversation[], now = new Date()):
     deletionRequests,
     topTopic: topics[0] ?? null,
     topics: topics.slice(0, 5),
-    languages,
     activity: [...activityMap.values()].filter((day) => day.date >= chartStart),
     recent,
   }

@@ -4,7 +4,6 @@ import type { ConversationQuery } from './types'
 export function conversationSearchParams(query: ConversationQuery): URLSearchParams {
   const params = new URLSearchParams()
   if (query.q) params.set('q', query.q)
-  if (query.language && query.language !== 'all') params.set('language', query.language)
   if (query.from) params.set('from', query.from)
   if (query.to) params.set('to', query.to)
   params.set('includeAnonymized', query.includeAnonymized === false ? 'false' : 'true')

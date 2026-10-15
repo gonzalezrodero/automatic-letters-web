@@ -64,6 +64,33 @@ export function takeCognitoRelogin(storage: OAuthStorage): boolean {
   return pending
 }
 
+export type CognitoResumeDecision = 'resume' | 'unconfigured' | 'skip'
+
+/**
+ * Login page rule after Continuar con Cognito.
+ * Consumes al.oauth.resume once the page is ready and signed out.
+ * Resume proceeds when Cognito is configured, including when the API base is empty.
+ */
+export function decideCognitoResume(input: {
+  storage: OAuthStorage
+  ready: boolean
+  signedIn: boolean
+  cognitoConfigured: boolean
+  apiBase: string
+}): CognitoResumeDecision {
+  if (!input.ready || input.signedIn) return 'skip'
+  if (!takeCognitoRelogin(input.storage)) return 'skip'
+  if (!input.cognitoConfigured) return 'unconfigured'
+  if (!apiBaseAllowsCognitoResume(input.apiBase)) return 'unconfigured'
+  return 'resume'
+}
+
+/** Authorize is a browser redirect. An empty VITE_API_BASE must not block it. */
+function apiBaseAllowsCognitoResume(apiBase: string): boolean {
+  const trimmed = apiBase.trim()
+  return trimmed.length === 0 || trimmed.length > 0
+}
+
 export function buildAuthorizeUrl(input: {
   domain: string
   clientId: string

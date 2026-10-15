@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, Search, Shield } from 'lucide-react'
 import { isUnavailable } from '../api/errors'
-import type { Conversation, Language } from '../api/types'
+import type { Conversation } from '../api/types'
 import { useAdmin } from '../auth/AdminContext'
 import { ChatThread } from '../components/ChatThread'
 import { NotReady } from '../components/NotReady'
@@ -11,8 +11,6 @@ import {
   cn,
   formatListTime,
   formatLong,
-  languageLabel,
-  languageShort,
   lastPreview,
   maskPhone,
 } from '../lib/format'
@@ -24,7 +22,6 @@ export function ConversationsPage() {
   const { api, tenant } = useAdmin()
   const [params, setParams] = useSearchParams()
   const q = params.get('q') ?? ''
-  const lang = (params.get('lang') ?? 'all') as Language | 'all'
   const from = params.get('from') ?? ''
   const to = params.get('to') ?? ''
   const includeAnonymized = params.get('anon') !== '0'
@@ -60,7 +57,6 @@ export function ConversationsPage() {
     api
       .listConversations(tenant.id, {
         q,
-        language: lang,
         from: from || undefined,
         to: to || undefined,
         includeAnonymized,
@@ -76,7 +72,7 @@ export function ConversationsPage() {
     return () => {
       cancel = true
     }
-  }, [api, tenant.id, q, lang, from, to, includeAnonymized])
+  }, [api, tenant.id, q, from, to, includeAnonymized])
 
   function update(partial: Record<string, string | null>) {
     setParams((current) => {
@@ -119,26 +115,15 @@ export function ConversationsPage() {
               aria-label="Buscar conversaciones"
             />
           </label>
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            <select
-              value={lang}
-              onChange={(event) => update({ lang: event.target.value === 'all' ? null : event.target.value })}
-              className="rounded-xl border border-line bg-card px-2 py-2 text-sm"
-              aria-label="Idioma"
-            >
-              <option value="all">Todos los idiomas</option>
-              <option value="es">Español</option>
-              <option value="ca">Català</option>
-              <option value="en">English</option>
-            </select>
-            <label className="flex items-center gap-2 rounded-xl border border-line bg-card px-2 py-2 text-sm">
-              <input
-                type="checkbox"
-                checked={includeAnonymized}
-                onChange={(event) => update({ anon: event.target.checked ? null : '0' })}
-              />
-              Anonimizadas
-            </label>
+          <label className="mt-3 flex items-center gap-2 rounded-xl border border-line bg-card px-2 py-2 text-sm">
+            <input
+              type="checkbox"
+              checked={includeAnonymized}
+              onChange={(event) => update({ anon: event.target.checked ? null : '0' })}
+            />
+            Anonimizadas
+          </label>
+          <div className="mt-2 grid grid-cols-2 gap-2">
             <label className="text-xs text-ink-soft">
               Desde
               <input
@@ -185,14 +170,7 @@ export function ConversationsPage() {
                         {when ? formatListTime(when) : ''}
                       </time>
                     </span>
-                    <span className="mt-1 flex items-center gap-2">
-                      {languageShort(conversation.language) ? (
-                        <span className="rounded-full bg-sand px-2 py-0.5 text-[10px] font-semibold">
-                          {languageShort(conversation.language)}
-                        </span>
-                      ) : null}
-                      <span className="truncate text-xs text-ink-soft">{conversation.topic}</span>
-                    </span>
+                    <span className="mt-1 block truncate text-xs text-ink-soft">{conversation.topic}</span>
                     <span className="mt-1 line-clamp-2 block text-sm text-ink/80">{lastPreview(conversation)}</span>
                   </Link>
                 </li>
@@ -261,7 +239,7 @@ function ConversationPane({ conversationId, onBack }: { conversationId: string; 
               {conversation.anonymized ? 'Usuario anonimizado' : maskPhone(conversation.userPhone)}
             </p>
             <p className="truncate text-xs text-ink-soft">
-              {[languageLabel(conversation.language), conversation.topic].filter(Boolean).join(' · ')}
+              {conversation.topic}
               {conversation.anonymized ? ' · GDPR' : ''}
             </p>
           </div>
