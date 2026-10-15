@@ -11,8 +11,15 @@ describe('resource ids', () => {
 
   it('encodes a normal id as one path segment', () => {
     expect(endpoints.tenant('example-tenant')).toBe('/tenants/example-tenant')
-    expect(endpoints.conversation('example-tenant', 'thread-01')).toBe(
-      '/tenants/example-tenant/conversations/thread-01',
+    expect(endpoints.document('example-tenant', 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee')).toBe(
+      '/tenants/example-tenant/documents/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+    )
+    expect(endpoints.answerUnanswered('example-tenant', 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee')).toBe(
+      '/tenants/example-tenant/unanswered/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+    )
+    expect(endpoints.answered('example-tenant')).toBe('/tenants/example-tenant/unanswered/answered')
+    expect(endpoints.reviseUnanswered('example-tenant', 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee')).toBe(
+      '/tenants/example-tenant/unanswered/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/revision',
     )
   })
 
