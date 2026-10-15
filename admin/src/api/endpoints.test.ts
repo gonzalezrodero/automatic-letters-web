@@ -21,6 +21,9 @@ describe('resource ids', () => {
     expect(endpoints.reviseUnanswered('example-tenant', 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee')).toBe(
       '/tenants/example-tenant/unanswered/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/revision',
     )
+    expect(endpoints.discardUnanswered('example-tenant', 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee')).toBe(
+      '/tenants/example-tenant/unanswered/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/discard',
+    )
   })
 
   it('rejects traversal and characters outside the id pattern', () => {

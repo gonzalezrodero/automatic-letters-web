@@ -22,4 +22,6 @@ export const endpoints = {
     `/tenants/${resourceSegment(tenantId)}/unanswered/${resourceSegment(questionId)}/revision`,
   withdrawUnanswered: (tenantId: string, questionId: string) =>
     `/tenants/${resourceSegment(tenantId)}/unanswered/${resourceSegment(questionId)}`,
+  discardUnanswered: (tenantId: string, questionId: string) =>
+    `/tenants/${resourceSegment(tenantId)}/unanswered/${resourceSegment(questionId)}/discard`,
 } as const

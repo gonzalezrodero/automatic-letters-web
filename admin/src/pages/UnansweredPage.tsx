@@ -18,6 +18,7 @@ export function UnansweredPage() {
   const [unavailable, setUnavailable] = useState(false)
   const [savingId, setSavingId] = useState<string | null>(null)
   const [confirmingId, setConfirmingId] = useState<string | null>(null)
+  const [discardingId, setDiscardingId] = useState<string | null>(null)
   const view = useRef(0)
 
   function show(
@@ -39,6 +40,7 @@ export function UnansweredPage() {
     setError(null)
     setSavingId(null)
     setConfirmingId(null)
+    setDiscardingId(null)
     Promise.all([api.listUnanswered(requested), api.listAnswered(requested)])
       .then(([open, closed]) => show(ticket, open, closed))
       .catch((reason: unknown) => {
@@ -98,6 +100,24 @@ export function UnansweredPage() {
     } catch (reason) {
       if (ticket !== view.current) return
       setError(reason instanceof Error ? reason.message : 'No se pudo corregir.')
+    } finally {
+      if (ticket === view.current) setSavingId(null)
+    }
+  }
+
+  async function discard(question: UnansweredQuestion) {
+    const requested = tenant.id
+    const ticket = view.current
+    setSavingId(question.id)
+    setError(null)
+    try {
+      await api.discardUnanswered(requested, question.id)
+      if (ticket !== view.current) return
+      setDiscardingId(null)
+      await reload(requested, ticket)
+    } catch (reason) {
+      if (ticket !== view.current) return
+      setError(reason instanceof Error ? reason.message : 'No se pudo descartar.')
     } finally {
       if (ticket === view.current) setSavingId(null)
     }
@@ -173,14 +193,34 @@ export function UnansweredPage() {
                 ) : (
                   <span />
                 )}
-                <button
-                  type="button"
-                  disabled={savingId === question.id}
-                  onClick={() => void save(question)}
-                  className="rounded-2xl bg-ink px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
-                >
-                  {savingId === question.id ? 'Guardando…' : 'Guardar en el conocimiento'}
-                </button>
+                <div className="flex items-center gap-3">
+                  {discardingId === question.id ? (
+                    <button
+                      type="button"
+                      className="text-sm font-medium text-danger"
+                      disabled={savingId === question.id}
+                      onClick={() => void discard(question)}
+                    >
+                      {savingId === question.id ? 'Descartando…' : 'Confirmar'}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="text-sm font-medium text-ink-soft hover:text-danger"
+                      onClick={() => setDiscardingId(question.id)}
+                    >
+                      Descartar
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    disabled={savingId === question.id}
+                    onClick={() => void save(question)}
+                    className="rounded-2xl bg-ink px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+                  >
+                    {savingId === question.id && discardingId !== question.id ? 'Guardando…' : 'Guardar en el conocimiento'}
+                  </button>
+                </div>
               </div>
             </li>
           ))}

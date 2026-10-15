@@ -104,6 +104,9 @@ export function createHttpAdminApi(baseUrl: string): AdminApi {
     withdrawUnanswered(tenantId, questionId) {
       return request<void>(endpoints.withdrawUnanswered(tenantId, questionId), { method: 'DELETE' })
     },
+    discardUnanswered(tenantId, questionId) {
+      return request<void>(endpoints.discardUnanswered(tenantId, questionId), { method: 'DELETE' })
+    },
     async resetDemo() {
       throw new Error('Restablecer la demo solo existe en el cliente simulado.')
     },

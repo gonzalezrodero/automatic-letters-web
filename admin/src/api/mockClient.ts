@@ -222,6 +222,16 @@ export function createMockAdminApi(): AdminApi {
       )
       persist()
     },
+    async discardUnanswered(tenantId, questionId) {
+      await wait()
+      requireTenant(tenantId)
+      const question = db.unanswered.find((item) => item.tenantId === tenantId && item.id === questionId && !item.answer)
+      if (!question) throw new Error('No encontramos esa pregunta.')
+      db.unanswered = db.unanswered.filter(
+        (item) => item.tenantId !== tenantId || Boolean(item.answer) || !sameQuestion(item.question, question.question),
+      )
+      persist()
+    },
     async resetDemo() {
       db = cloneSeed()
       sessionStorage.removeItem(STORAGE_KEY)
