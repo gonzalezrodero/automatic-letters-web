@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { isUnavailable } from '../api/errors'
 import type { AnsweredQuestion, UnansweredQuestion } from '../api/types'
@@ -18,38 +18,46 @@ export function UnansweredPage() {
   const [unavailable, setUnavailable] = useState(false)
   const [savingId, setSavingId] = useState<string | null>(null)
   const [confirmingId, setConfirmingId] = useState<string | null>(null)
+  const view = useRef(0)
 
-  async function load() {
-    const [open, closed] = await Promise.all([
-      api.listUnanswered(tenant.id),
-      api.listAnswered(tenant.id),
-    ])
+  function show(
+    ticket: number,
+    open: UnansweredQuestion[],
+    closed: AnsweredQuestion[],
+  ) {
+    if (ticket !== view.current) return
     setQuestions(open)
     setAnswered(closed)
     setCorrections(Object.fromEntries(closed.map((item) => [item.id, item.answer])))
   }
 
   useEffect(() => {
-    let cancel = false
+    const ticket = ++view.current
+    const requested = tenant.id
     setQuestions(null)
     setAnswered(null)
     setError(null)
-    Promise.all([api.listUnanswered(tenant.id), api.listAnswered(tenant.id)])
-      .then(([open, closed]) => {
-        if (cancel) return
-        setQuestions(open)
-        setAnswered(closed)
-        setCorrections(Object.fromEntries(closed.map((item) => [item.id, item.answer])))
-      })
+    setSavingId(null)
+    setConfirmingId(null)
+    Promise.all([api.listUnanswered(requested), api.listAnswered(requested)])
+      .then(([open, closed]) => show(ticket, open, closed))
       .catch((reason: unknown) => {
-        if (cancel) return
+        if (ticket !== view.current) return
         if (isUnavailable(reason)) setUnavailable(true)
         else setError(reason instanceof Error ? reason.message : 'No se pudieron cargar.')
       })
     return () => {
-      cancel = true
+      view.current += 1
     }
   }, [api, tenant.id])
+
+  async function reload(requested: string, ticket: number) {
+    const [open, closed] = await Promise.all([
+      api.listUnanswered(requested),
+      api.listAnswered(requested),
+    ])
+    show(ticket, open, closed)
+  }
 
   async function save(question: UnansweredQuestion) {
     const problem = answerError(drafts[question.id] ?? '')
@@ -58,15 +66,18 @@ export function UnansweredPage() {
       return
     }
 
+    const requested = tenant.id
+    const ticket = view.current
     setSavingId(question.id)
     setError(null)
     try {
-      await api.answerUnanswered(tenant.id, question.id, (drafts[question.id] ?? '').trim())
-      await load()
+      await api.answerUnanswered(requested, question.id, (drafts[question.id] ?? '').trim())
+      await reload(requested, ticket)
     } catch (reason) {
+      if (ticket !== view.current) return
       setError(reason instanceof Error ? reason.message : 'No se pudo guardar.')
     } finally {
-      setSavingId(null)
+      if (ticket === view.current) setSavingId(null)
     }
   }
 
@@ -77,29 +88,36 @@ export function UnansweredPage() {
       return
     }
 
+    const requested = tenant.id
+    const ticket = view.current
     setSavingId(question.id)
     setError(null)
     try {
-      await api.reviseUnanswered(tenant.id, question.id, (corrections[question.id] ?? '').trim())
-      await load()
+      await api.reviseUnanswered(requested, question.id, (corrections[question.id] ?? '').trim())
+      await reload(requested, ticket)
     } catch (reason) {
+      if (ticket !== view.current) return
       setError(reason instanceof Error ? reason.message : 'No se pudo corregir.')
     } finally {
-      setSavingId(null)
+      if (ticket === view.current) setSavingId(null)
     }
   }
 
   async function withdraw(question: AnsweredQuestion) {
+    const requested = tenant.id
+    const ticket = view.current
     setSavingId(question.id)
     setError(null)
     try {
-      await api.withdrawUnanswered(tenant.id, question.id)
+      await api.withdrawUnanswered(requested, question.id)
+      if (ticket !== view.current) return
       setConfirmingId(null)
-      await load()
+      await reload(requested, ticket)
     } catch (reason) {
+      if (ticket !== view.current) return
       setError(reason instanceof Error ? reason.message : 'No se pudo quitar.')
     } finally {
-      setSavingId(null)
+      if (ticket === view.current) setSavingId(null)
     }
   }
 
