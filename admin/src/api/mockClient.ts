@@ -1,8 +1,9 @@
 import { SEED_VERSION, seedDatabase, type DemoDatabase } from '../data/seed'
 import { safeNavigationUrl } from '../lib/safeUrl'
 import { activityTime, maskPhone } from '../lib/format'
+import { answerError, latestAnswered, sameQuestion } from '../lib/unanswered'
 import { buildDashboard, inDateRange } from '../lib/stats'
-import type { AdminApi, Conversation, ConversationQuery, KnowledgeDocument, TenantProfile } from './types'
+import type { AdminApi, AnsweredQuestion, Conversation, ConversationQuery, KnowledgeDocument, TenantProfile } from './types'
 
 const STORAGE_KEY = 'al.demo.db'
 
@@ -154,6 +155,70 @@ export function createMockAdminApi(): AdminApi {
       requireTenant(tenantId)
       db.documents = db.documents.filter(
         (item) => !(item.tenantId === tenantId && item.id === documentId),
+      )
+      persist()
+    },
+    async listUnanswered(tenantId) {
+      await wait()
+      requireTenant(tenantId)
+      return db.unanswered
+        .filter((item) => item.tenantId === tenantId && !item.answer)
+        .map(({ tenantId: _tenantId, answer: _answer, answeredAt: _answeredAt, ...item }) => item)
+    },
+    async answerUnanswered(tenantId, questionId, answer) {
+      await wait()
+      requireTenant(tenantId)
+      const problem = answerError(answer)
+      if (problem) throw new Error(problem)
+      const question = db.unanswered.find((item) => item.tenantId === tenantId && item.id === questionId && !item.answer)
+      if (!question) throw new Error('No encontramos esa pregunta.')
+      const answeredAt = new Date().toISOString()
+      for (const item of db.unanswered) {
+        if (item.tenantId === tenantId && !item.answer && sameQuestion(item.question, question.question)) {
+          item.answer = answer.trim()
+          item.answeredAt = answeredAt
+        }
+      }
+      persist()
+    },
+    async listAnswered(tenantId) {
+      await wait()
+      requireTenant(tenantId)
+      const closed = db.unanswered.filter((item): item is typeof item & { answer: string; answeredAt: string } =>
+        item.tenantId === tenantId && Boolean(item.answer) && Boolean(item.answeredAt),
+      )
+      return latestAnswered(closed).map(
+        (item): AnsweredQuestion => ({
+          id: item.id,
+          question: item.question,
+          answer: item.answer,
+          answeredAt: item.answeredAt,
+        }),
+      )
+    },
+    async reviseUnanswered(tenantId, questionId, answer) {
+      await wait()
+      requireTenant(tenantId)
+      const problem = answerError(answer)
+      if (problem) throw new Error(problem)
+      const question = db.unanswered.find((item) => item.tenantId === tenantId && item.id === questionId && item.answer)
+      if (!question) throw new Error('No encontramos esa respuesta.')
+      const answeredAt = new Date().toISOString()
+      for (const item of db.unanswered) {
+        if (item.tenantId === tenantId && item.answer && sameQuestion(item.question, question.question)) {
+          item.answer = answer.trim()
+          item.answeredAt = answeredAt
+        }
+      }
+      persist()
+    },
+    async withdrawUnanswered(tenantId, questionId) {
+      await wait()
+      requireTenant(tenantId)
+      const question = db.unanswered.find((item) => item.tenantId === tenantId && item.id === questionId && item.answer)
+      if (!question) throw new Error('No encontramos esa respuesta.')
+      db.unanswered = db.unanswered.filter(
+        (item) => item.tenantId !== tenantId || !item.answer || !sameQuestion(item.question, question.question),
       )
       persist()
     },

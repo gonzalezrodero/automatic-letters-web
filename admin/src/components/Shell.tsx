@@ -5,6 +5,7 @@ import {
   ChevronDown,
   LayoutDashboard,
   Library,
+  CircleHelp,
   LogOut,
   Menu,
   MessagesSquare,
@@ -20,6 +21,7 @@ import { Logo } from './Logo'
 const links = [
   { to: '/', label: 'Panel', icon: LayoutDashboard, end: true },
   { to: '/conversaciones', label: 'Conversaciones', icon: MessagesSquare, end: false },
+  { to: '/sin-respuesta', label: 'Sin respuesta', icon: CircleHelp, end: false },
   { to: '/conocimiento', label: 'Conocimiento', icon: Library, end: false },
   { to: '/ajustes', label: 'Ajustes del bot', icon: Settings, end: false },
 ]

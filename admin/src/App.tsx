@@ -6,6 +6,7 @@ import { CallbackPage } from './pages/CallbackPage'
 import { ConversationsPage } from './pages/ConversationsPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { KnowledgePage } from './pages/KnowledgePage'
+import { UnansweredPage } from './pages/UnansweredPage'
 import { LoginPage } from './pages/LoginPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { TenantsPage } from './pages/TenantsPage'
@@ -47,6 +48,7 @@ const router = createBrowserRouter(
         { index: true, element: <DashboardPage /> },
         { path: 'conversaciones', element: <ConversationsPage /> },
         { path: 'conversaciones/:conversationId', element: <ConversationsPage /> },
+        { path: 'sin-respuesta', element: <UnansweredPage /> },
         { path: 'conocimiento', element: <KnowledgePage /> },
         { path: 'ajustes', element: <SettingsPage /> },
         { path: 'organizaciones', element: <TenantsPage /> },

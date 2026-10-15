@@ -79,6 +79,20 @@ export interface DashboardStats {
   recent: ConversationPreview[]
 }
 
+export interface UnansweredQuestion {
+  id: string
+  conversationId: string
+  question: string
+  askedAt: string
+}
+
+export interface AnsweredQuestion {
+  id: string
+  question: string
+  answer: string
+  answeredAt: string
+}
+
 export interface TenantSettingsPatch {
   systemPrompt: string
   privacyPolicyUrl: string
@@ -98,5 +112,10 @@ export interface AdminApi {
   listDocuments(tenantId: string): Promise<KnowledgeDocument[]>
   uploadDocument(tenantId: string, file: File): Promise<KnowledgeDocument>
   deleteDocument(tenantId: string, documentId: string): Promise<void>
+  listUnanswered(tenantId: string): Promise<UnansweredQuestion[]>
+  answerUnanswered(tenantId: string, questionId: string, answer: string): Promise<void>
+  listAnswered(tenantId: string): Promise<AnsweredQuestion[]>
+  reviseUnanswered(tenantId: string, questionId: string, answer: string): Promise<void>
+  withdrawUnanswered(tenantId: string, questionId: string): Promise<void>
   resetDemo(): Promise<void>
 }

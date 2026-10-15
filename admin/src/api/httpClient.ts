@@ -2,7 +2,7 @@ import { getCredential } from '../auth/credentials'
 import { endpoints } from './endpoints'
 import { publicApiError } from './errors'
 import { conversationSearchParams } from './query'
-import type { AdminApi, Conversation, DashboardStats, KnowledgeDocument, TenantProfile, TenantSettingsPatch } from './types'
+import type { AdminApi, AnsweredQuestion, Conversation, DashboardStats, KnowledgeDocument, TenantProfile, TenantSettingsPatch, UnansweredQuestion } from './types'
 
 const MISSING_SESSION = 'No hay sesión con el API. Entra con Cognito.'
 
@@ -82,6 +82,27 @@ export function createHttpAdminApi(baseUrl: string): AdminApi {
     },
     deleteDocument(tenantId, documentId) {
       return request<void>(endpoints.document(tenantId, documentId), { method: 'DELETE' })
+    },
+    listUnanswered(tenantId) {
+      return request<UnansweredQuestion[]>(endpoints.unanswered(tenantId))
+    },
+    answerUnanswered(tenantId, questionId, answer) {
+      return request<void>(endpoints.answerUnanswered(tenantId, questionId), {
+        method: 'POST',
+        body: JSON.stringify({ answer }),
+      })
+    },
+    listAnswered(tenantId) {
+      return request<AnsweredQuestion[]>(endpoints.answered(tenantId))
+    },
+    reviseUnanswered(tenantId, questionId, answer) {
+      return request<void>(endpoints.reviseUnanswered(tenantId, questionId), {
+        method: 'POST',
+        body: JSON.stringify({ answer }),
+      })
+    },
+    withdrawUnanswered(tenantId, questionId) {
+      return request<void>(endpoints.withdrawUnanswered(tenantId, questionId), { method: 'DELETE' })
     },
     async resetDemo() {
       throw new Error('Restablecer la demo solo existe en el cliente simulado.')
