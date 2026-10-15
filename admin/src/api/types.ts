@@ -117,5 +117,6 @@ export interface AdminApi {
   listAnswered(tenantId: string): Promise<AnsweredQuestion[]>
   reviseUnanswered(tenantId: string, questionId: string, answer: string): Promise<void>
   withdrawUnanswered(tenantId: string, questionId: string): Promise<void>
+  discardUnanswered(tenantId: string, questionId: string): Promise<void>
   resetDemo(): Promise<void>
 }
