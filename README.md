@@ -19,7 +19,7 @@ With `VITE_API_BASE` empty it uses an in-memory client that starts empty. [`admi
 
 ### Run locally
 
-Requires Node.js 22+.
+Requires Node.js 24 (current LTS).
 
 ```bash
 cd admin
