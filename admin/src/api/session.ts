@@ -24,8 +24,8 @@ export async function fetchSessionProfile(
     }
     const body = (await response.json()) as ProfileBody
     return profileFromBody(body)
-  } catch (error) {
-    console.error('API error', error)
+  } catch {
+    console.error('access')
     return null
   }
 }

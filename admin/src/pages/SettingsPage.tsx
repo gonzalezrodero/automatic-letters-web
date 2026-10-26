@@ -29,7 +29,7 @@ export function SettingsPage() {
     setNotice(null)
     const privacyUrl = safeNavigationUrl(url)
     if (!privacyUrl) {
-      setError('La política de privacidad tiene que ser https. En local también vale http://localhost.')
+      setError('El enlace de privacidad tiene que ser una dirección web segura (https).')
       return
     }
     if (!prompt.trim()) {
@@ -45,7 +45,7 @@ export function SettingsPage() {
       replaceTenant(updated)
       setNotice('Guardado.')
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'No se pudo guardar.')
+      setError(reason instanceof Error ? reason.message : 'No hemos podido guardar los cambios. Vuelve a intentarlo.')
     } finally {
       setSaving(false)
     }
@@ -57,7 +57,7 @@ export function SettingsPage() {
       await api.resetDemo()
       window.location.reload()
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'No se pudo restaurar la demo.')
+      setError(reason instanceof Error ? reason.message : 'No hemos podido restaurar la demostración. Vuelve a intentarlo.')
     }
   }
 
@@ -72,7 +72,7 @@ export function SettingsPage() {
           </p>
 
           <label className="mt-6 block">
-            <span className="mb-1.5 block text-sm font-medium">Persona · system prompt</span>
+            <span className="mb-1.5 block text-sm font-medium">Cómo habla el bot</span>
             <textarea
               value={prompt}
               onChange={(event) => {
@@ -99,8 +99,8 @@ export function SettingsPage() {
           </label>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <Field label="Id del tenant" value={tenant.id} />
-            <Field label="Phone number ID de WhatsApp" value={tenant.botPhoneNumberId} />
+            <Field label="Identificador de la organización" value={tenant.id} />
+            <Field label="Referencia de WhatsApp" value={tenant.botPhoneNumberId} />
           </div>
 
           {error ? <p className="mt-4 text-sm text-danger">{error}</p> : null}
@@ -144,7 +144,7 @@ export function SettingsPage() {
 function PrivacyLink({ value }: { value: string }) {
   const href = safeNavigationUrl(value)
   if (!href) {
-    return <p className="mt-4 truncate text-sm text-white/70">{value || 'Sin URL válida'}</p>
+    return <p className="mt-4 truncate text-sm text-white/70">{value || 'Sin enlace de privacidad'}</p>
   }
   return (
     <a href={href} className="mt-4 block truncate text-sm text-bot hover:underline" target="_blank" rel="noopener noreferrer">

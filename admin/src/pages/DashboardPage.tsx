@@ -28,7 +28,7 @@ export function DashboardPage() {
       .catch((reason: unknown) => {
         if (cancel) return
         if (isUnavailable(reason)) setUnavailable(true)
-        else setError(reason instanceof Error ? reason.message : 'No se pudo cargar el panel.')
+        else setError(reason instanceof Error ? reason.message : 'No hemos podido cargar el resumen. Vuelve a intentarlo.')
       })
     return () => {
       cancel = true
@@ -38,8 +38,8 @@ export function DashboardPage() {
   if (unavailable) {
     return (
       <NotReady
-        title="El panel todavía no está en el API"
-        detail="Organizaciones y ajustes sí. Conversaciones, documentos y el resumen semanal se añadirán cuando el API los tenga."
+        title="El resumen todavía no está disponible"
+        detail="Organizaciones y ajustes sí. Conversaciones, documentos y el resumen semanal se añadirán más adelante."
       />
     )
   }

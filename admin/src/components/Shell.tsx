@@ -115,7 +115,7 @@ export function Shell() {
             <div className="min-w-0">
               <p className="truncate text-sm font-medium">{session?.name}</p>
               <p className="truncate text-xs text-white/55">
-                {superadmin ? 'Superadmin' : shortLabel}
+                {superadmin ? 'Administración' : shortLabel}
               </p>
             </div>
           </div>

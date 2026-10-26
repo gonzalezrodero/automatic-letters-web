@@ -33,7 +33,7 @@ export function KnowledgePage() {
       .catch((reason: unknown) => {
         if (cancel) return
         if (isUnavailable(reason)) setUnavailable(true)
-        else setError(reason instanceof Error ? reason.message : 'No se pudo cargar.')
+        else setError(reason instanceof Error ? reason.message : 'No hemos podido cargar los documentos. Vuelve a intentarlo.')
       })
     return () => {
       cancel = true
@@ -47,7 +47,7 @@ export function KnowledgePage() {
       try {
         await api.uploadDocument(tenant.id, file)
       } catch (reason) {
-        setError(reason instanceof Error ? reason.message : 'No se pudo subir el archivo.')
+        setError(reason instanceof Error ? reason.message : 'No hemos podido subir el archivo. Vuelve a intentarlo.')
       }
     }
     const current = await refresh()
@@ -61,8 +61,8 @@ export function KnowledgePage() {
   if (unavailable) {
     return (
       <NotReady
-        title="Los documentos todavía no están en el API"
-        detail="La subida y el listado se conectarán cuando el API los tenga."
+        title="Los documentos todavía no están disponibles"
+        detail="Cuando estén listos, podrás subirlos y verlos aquí."
       />
     )
   }
@@ -72,8 +72,8 @@ export function KnowledgePage() {
       <div className="mx-auto max-w-4xl px-4 py-6 sm:px-8 sm:py-8">
         <h1 className="font-display text-4xl">Conocimiento</h1>
         <p className="mt-2 max-w-2xl text-ink-soft">
-          Documentos que el bot de {tenantShortLabel(tenant)} trocea para responder. La subida envía el archivo al
-          API y queda indexado para ese tenant.
+          Documentos que el bot de {tenantShortLabel(tenant)} usa para responder. Al subir un archivo, queda
+          disponible para esa organización.
         </p>
 
         <button
@@ -94,7 +94,7 @@ export function KnowledgePage() {
           }`}
         >
           <Upload className="h-6 w-6 text-moss" />
-          <span className="mt-3 font-medium">Subir PDF, Markdown o texto</span>
+          <span className="mt-3 font-medium">Subir un PDF o un texto</span>
           <span className="mt-1 text-sm text-ink-soft">Arrastra un archivo o pulsa para elegirlo.</span>
         </button>
         <input

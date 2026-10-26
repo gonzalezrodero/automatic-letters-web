@@ -23,8 +23,8 @@ export async function requestApiLogout(
     }
     const body = (await response.json()) as { cognitoLogoutUrl?: unknown }
     return acceptedCognitoLogoutUrl(body.cognitoLogoutUrl, cognitoHost)
-  } catch (error) {
-    console.error('API error', error)
+  } catch {
+    console.error('access')
     return null
   }
 }

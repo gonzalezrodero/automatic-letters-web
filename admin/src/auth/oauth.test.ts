@@ -153,7 +153,10 @@ describe('takeOAuthCallback', () => {
         next = value
       },
     })
-    expect(result).toEqual({ kind: 'error', message: 'Cognito no ha completado el acceso.' })
+    expect(result).toEqual({
+      kind: 'error',
+      message: 'No hemos podido iniciar tu sesión. Vuelve a entrar desde la pantalla de acceso.',
+    })
     expect(next).toBe('/auth/callback')
     expect(spy).not.toHaveBeenCalled()
     spy.mockRestore()

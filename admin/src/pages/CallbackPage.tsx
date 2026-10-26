@@ -19,7 +19,7 @@ export function CallbackPage() {
     if (pending.kind !== 'code') return
     const apiBase = import.meta.env.VITE_API_BASE?.trim()
     if (!apiBase) {
-      setError('No se ha podido completar el acceso. Vuelve a intentarlo.')
+      setError('No hemos podido iniciar tu sesión. Vuelve a entrar desde la pantalla de acceso.')
       return
     }
 
@@ -43,7 +43,13 @@ export function CallbackPage() {
         if (!cancel) navigate('/', { replace: true })
       })
       .catch((reason: unknown) => {
-        if (!cancel) setError(reason instanceof Error ? reason.message : 'No se pudo completar el acceso.')
+        if (!cancel) {
+          setError(
+            reason instanceof Error
+              ? reason.message
+              : 'No hemos podido iniciar tu sesión. Vuelve a entrar desde la pantalla de acceso.',
+          )
+        }
       })
 
     return () => {
@@ -54,19 +60,19 @@ export function CallbackPage() {
   return (
     <div className="mx-auto flex min-h-dvh max-w-lg flex-col justify-center px-6 py-16">
       <Logo />
-      <h1 className="mt-8 font-display text-4xl">Completando el acceso</h1>
+      <h1 className="mt-8 font-display text-4xl">Estamos entrando</h1>
       <p className="mt-3 leading-relaxed text-ink-soft">Un momento, estamos comprobando tu cuenta.</p>
       {error ? <p className="mt-4 text-sm text-danger">{error}</p> : null}
       {pending.kind === 'code' && !error ? (
-        <p className="mt-4 rounded-2xl bg-foam px-4 py-3 text-sm text-moss-deep">Completando el acceso…</p>
+        <p className="mt-4 rounded-2xl bg-foam px-4 py-3 text-sm text-moss-deep">Esto puede tardar unos segundos.</p>
       ) : null}
       {pending.kind === 'empty' && !error ? (
         <p className="mt-4 rounded-2xl bg-sand px-4 py-3 text-sm">
-          No hay un código de autorización en esta visita.
+          No hemos podido iniciar tu sesión. Vuelve a entrar desde la pantalla de acceso.
         </p>
       ) : null}
       <Link to="/login" className="mt-8 inline-flex font-medium text-moss-deep hover:underline">
-        Volver al acceso
+        Volver a entrar
       </Link>
     </div>
   )

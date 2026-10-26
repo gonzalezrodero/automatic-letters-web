@@ -40,7 +40,7 @@ export function TenantsPage() {
         setMetricsMissing(next.length > 0 && next.every((row) => row.stats === null))
       })
       .catch((reason: unknown) => {
-        if (!cancel) setError(reason instanceof Error ? reason.message : 'No se pudieron comparar.')
+        if (!cancel) setError(reason instanceof Error ? reason.message : 'No hemos podido cargar el resumen. Vuelve a intentarlo.')
       })
     return () => {
       cancel = true
@@ -54,11 +54,10 @@ export function TenantsPage() {
       <div className="mx-auto max-w-5xl px-4 py-6 sm:px-8 sm:py-8">
         <h1 className="font-display text-4xl">Organizaciones</h1>
         <p className="mt-2 max-w-2xl text-ink-soft">
-          Vista de superadmin. Cada tarjeta es un tenant con su grupo de Cognito. Entrar cambia el portal entero a
-          esa organización.
+          Cada tarjeta es una organización. Al abrirla, el portal pasa a mostrar esa organización.
         </p>
         {metricsMissing ? (
-          <p className="mt-4 text-sm text-ink-soft">El resumen de cada organización todavía no está en el API.</p>
+          <p className="mt-4 text-sm text-ink-soft">El resumen de cada organización todavía no está disponible.</p>
         ) : null}
         {error ? <p className="mt-4 text-sm text-danger">{error}</p> : null}
         <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -90,11 +89,9 @@ export function TenantsPage() {
                   <Metric label="Mensajes" value={metric(row.stats?.messagesThisWeek, metricsMissing || rows !== null)} />
                   <Metric label="Activos" value={metric(row.stats?.activeUsers, metricsMissing || rows !== null)} />
                 </dl>
-                <p className="mt-4 text-xs text-ink-soft">
-                  Grupo Cognito <code className="text-ink">{row.tenant.id}</code>
-                  <br />
-                  WhatsApp phone number id {row.tenant.botPhoneNumberId}
-                </p>
+                {row.tenant.displayPhone.trim() ? (
+                  <p className="mt-4 text-xs text-ink-soft">WhatsApp {row.tenant.displayPhone.trim()}</p>
+                ) : null}
                 <button
                   type="button"
                   className="mt-5 rounded-2xl bg-ink py-3 text-sm font-semibold text-white"

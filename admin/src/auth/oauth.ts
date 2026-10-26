@@ -143,14 +143,14 @@ export function takeOAuthCallback(input: {
 
   if (oauthError) {
     clearOAuthRequest(input.storage)
-    return { kind: 'error', message: 'Cognito no ha completado el acceso.' }
+    return { kind: 'error', message: 'No hemos podido iniciar tu sesión. Vuelve a entrar desde la pantalla de acceso.' }
   }
   if (!code) {
     return { kind: 'empty' }
   }
   const verifier = consumeOAuthRequest(input.storage, state)
   if (!verifier) {
-    return { kind: 'error', message: 'La respuesta de Cognito no coincide con esta pestaña. Vuelve a entrar.' }
+    return { kind: 'error', message: 'No hemos podido iniciar tu sesión. Vuelve a entrar desde la pantalla de acceso.' }
   }
   return { kind: 'code', code, verifier }
 }

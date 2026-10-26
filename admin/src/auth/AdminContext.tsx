@@ -36,7 +36,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
         setError(null)
       })
       .catch((reason: unknown) => {
-        if (!cancel) setError(reason instanceof Error ? reason.message : 'No se pudo cargar.')
+        if (!cancel) setError(reason instanceof Error ? reason.message : 'No hemos podido cargar tus organizaciones. Vuelve a intentarlo.')
       })
     return () => {
       cancel = true
@@ -94,7 +94,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
           <div className="max-w-md">
             <h1 className="font-display text-3xl">Todavía no hay organizaciones</h1>
             <p className="mt-3 text-sm leading-relaxed text-ink-soft">
-              La cuenta de administración es válida. Cuando el API devuelva tenants, el portal los listará aquí.
+              Tu cuenta es correcta. Cuando haya organizaciones, aparecerán aquí.
             </p>
             <button
               type="button"
@@ -112,8 +112,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
         <div className="max-w-md">
           <h1 className="font-display text-3xl">Sin acceso a una organización</h1>
           <p className="mt-3 text-sm leading-relaxed text-ink-soft">
-            Esta cuenta no tiene un tenant asignado. El grupo <code className="text-ink">admin</code> ve todas
-            las organizaciones; cualquier otro grupo tiene que llamarse como el id del tenant.
+            Tu cuenta no tiene acceso a una organización. Pide acceso a quien administra tu club.
           </p>
           <button
             type="button"

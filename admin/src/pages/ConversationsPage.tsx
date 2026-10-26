@@ -67,7 +67,7 @@ export function ConversationsPage() {
       .catch((reason: unknown) => {
         if (cancel) return
         if (isUnavailable(reason)) setUnavailable(true)
-        else setError(reason instanceof Error ? reason.message : 'No se pudieron cargar.')
+        else setError(reason instanceof Error ? reason.message : 'No hemos podido cargar las conversaciones. Vuelve a intentarlo.')
       })
     return () => {
       cancel = true
@@ -88,8 +88,8 @@ export function ConversationsPage() {
   if (unavailable) {
     return (
       <NotReady
-        title="Las conversaciones todavía no están en el API"
-        detail="El listado y el hilo se mostrarán cuando el API los tenga. Organizaciones y ajustes ya funcionan."
+        title="Las conversaciones todavía no están disponibles"
+        detail="Cuando estén listas, verás aquí el listado y cada conversación. Organizaciones y ajustes ya funcionan."
       />
     )
   }
@@ -215,7 +215,7 @@ function ConversationPane({ conversationId, onBack }: { conversationId: string; 
         if (!cancel) setConversation(next)
       })
       .catch((reason: unknown) => {
-        if (!cancel) setError(reason instanceof Error ? reason.message : 'No se pudo abrir.')
+        if (!cancel) setError(reason instanceof Error ? reason.message : 'No hemos podido abrir la conversación. Vuelve a intentarlo.')
       })
     return () => {
       cancel = true

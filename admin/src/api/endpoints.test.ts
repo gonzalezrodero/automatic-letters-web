@@ -27,9 +27,10 @@ describe('resource ids', () => {
   })
 
   it('rejects traversal and characters outside the id pattern', () => {
-    expect(() => endpoints.tenant('../other-tenant')).toThrow(/no válido/)
-    expect(() => endpoints.conversation('example-tenant', '..')).toThrow(/no válido/)
-    expect(() => endpoints.document('club', 'doc/secret')).toThrow(/no válido/)
-    expect(() => assertResourceId('Club')).toThrow(/no válido/)
+    const invalid = 'No hemos podido abrir esto. Vuelve atrás e inténtalo de nuevo.'
+    expect(() => endpoints.tenant('../other-tenant')).toThrow(invalid)
+    expect(() => endpoints.conversation('example-tenant', '..')).toThrow(invalid)
+    expect(() => endpoints.document('club', 'doc/secret')).toThrow(invalid)
+    expect(() => assertResourceId('Club')).toThrow(invalid)
   })
 })
