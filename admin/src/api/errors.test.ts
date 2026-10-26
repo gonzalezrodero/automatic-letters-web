@@ -2,12 +2,12 @@ import { describe, expect, it, vi } from 'vitest'
 import { messageForStatus, publicApiError } from './errors'
 
 describe('publicApiError', () => {
-  it('uses a fixed message and does not return the body', () => {
+  it('uses a fixed message and logs only the status', () => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
-    const error = publicApiError(500, '<html>NullReferenceException at Secret.cs</html>')
+    const error = publicApiError(500)
     expect(error.message).toBe(messageForStatus(500))
-    expect(error.message).not.toContain('NullReference')
-    expect(spy).toHaveBeenCalled()
+    expect(spy).toHaveBeenCalledTimes(1)
+    expect(spy).toHaveBeenCalledWith('API error', 500)
     spy.mockRestore()
   })
 })

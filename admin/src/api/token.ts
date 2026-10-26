@@ -47,7 +47,7 @@ export async function exchangeAuthorizationCode(input: {
   }
 
   if (!response.ok) {
-    throw publicApiError(response.status, await response.text())
+    throw publicApiError(response.status)
   }
 
   const body = (await response.json()) as TokenBody

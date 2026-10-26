@@ -20,7 +20,7 @@ export function messageForStatus(status: number): string {
   return 'No se ha podido completar la petición.'
 }
 
-export function publicApiError(status: number, detail: string): Error {
-  console.error('API error', status, detail.slice(0, 2000))
+export function publicApiError(status: number): Error {
+  console.error('API error', status)
   return new Error(messageForStatus(status))
 }

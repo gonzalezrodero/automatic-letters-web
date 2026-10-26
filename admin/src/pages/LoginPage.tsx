@@ -1,7 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import {
-  COGNITO_AUTHORIZE_TEMPLATE,
   cognitoConfigured,
   cognitoLogoutUrl,
   cognitoRedirectUri,
@@ -49,8 +48,7 @@ export function LoginPage() {
           return
         }
         window.location.assign(url)
-      } catch (reason) {
-        console.error(reason)
+      } catch {
         setRestarting(false)
         setError('No se pudo iniciar el acceso con Cognito.')
       }
@@ -91,8 +89,7 @@ export function LoginPage() {
         return
       }
       window.location.assign(url)
-    } catch (reason) {
-      console.error(reason)
+    } catch {
       setError('No se pudo iniciar el acceso con Cognito.')
     }
   }
@@ -107,7 +104,8 @@ export function LoginPage() {
             El bot de cada club, visto desde dentro.
           </h1>
           <p className="mt-5 text-lg leading-relaxed text-white/70">
-            Conversaciones, documentos del RAG y la personalidad del asistente. Un grupo de Cognito por tenant, y el grupo admin para cambiar de organización.
+            Conversaciones, documentos del RAG y la personalidad del asistente. Puedes cambiar de
+            organización si tu cuenta lo permite.
           </p>
         </div>
         <div className="max-w-sm rounded-3xl bg-white/10 p-4 ring-1 ring-white/15">
@@ -184,23 +182,7 @@ export function LoginPage() {
             {restarting ? 'Abriendo el acceso…' : 'Continuar con Cognito'}
           </button>
 
-          {showCognito ? (
-            <div className="mt-4 rounded-2xl border border-line bg-sand/60 p-4 text-sm leading-relaxed">
-              <p className="font-medium">Aquí iría el Hosted UI</p>
-              <p className="mt-2 text-ink-soft">
-                Con <code className="text-ink">VITE_COGNITO_DOMAIN</code> y{' '}
-                <code className="text-ink">VITE_COGNITO_CLIENT_ID</code>, este botón redirige a{' '}
-                <code className="text-ink">/oauth2/authorize</code> con <code className="text-ink">state</code> y
-                PKCE (<code className="text-ink">S256</code>). El callback es{' '}
-                <code className="break-all text-ink">{cognitoRedirectUri()}</code>. El API .NET canjea el código.
-                Si el token trae el grupo <code className="text-ink">admin</code>, esa cuenta es superadmin aunque
-                también tenga un grupo de tenant.
-              </p>
-              <p className="mt-3 break-all rounded-xl bg-card px-3 py-2 font-mono text-[11px] text-ink-soft">
-                {COGNITO_AUTHORIZE_TEMPLATE}
-              </p>
-            </div>
-          ) : null}
+          {showCognito ? cognitoSetupNotice() : null}
 
           {showDemoForm ? (
           <div className="mt-8">
@@ -233,6 +215,45 @@ export function LoginPage() {
           ) : null}
         </div>
       </section>
+    </div>
+  )
+}
+
+function cognitoSetupNotice() {
+  if (!import.meta.env.DEV) {
+    return (
+      <p className="mt-4 rounded-2xl border border-line bg-sand/60 p-4 text-sm leading-relaxed text-ink-soft">
+        El acceso no está disponible ahora mismo. Vuelve a intentarlo más tarde.
+      </p>
+    )
+  }
+
+  const authorizeTemplate = [
+    'https://auth.core-webhook.eu/oauth2/authorize',
+    '?client_id=ADMIN_CLIENT_ID',
+    '&response_type=code',
+    '&scope=openid%20email%20profile',
+    '&redirect_uri=https://admin.core-webhook.eu/auth/callback',
+    '&state=STATE',
+    '&code_challenge=PKCE_S256',
+    '&code_challenge_method=S256',
+  ].join('')
+
+  return (
+    <div className="mt-4 rounded-2xl border border-line bg-sand/60 p-4 text-sm leading-relaxed">
+      <p className="font-medium">Aquí iría el Hosted UI</p>
+      <p className="mt-2 text-ink-soft">
+        Con <code className="text-ink">VITE_COGNITO_DOMAIN</code> y{' '}
+        <code className="text-ink">VITE_COGNITO_CLIENT_ID</code>, este botón redirige a{' '}
+        <code className="text-ink">/oauth2/authorize</code> con <code className="text-ink">state</code> y PKCE (
+        <code className="text-ink">S256</code>). El callback es{' '}
+        <code className="break-all text-ink">{cognitoRedirectUri()}</code>. El API .NET canjea el código. Si el
+        token trae el grupo <code className="text-ink">admin</code>, esa cuenta es superadmin aunque también tenga
+        un grupo de tenant.
+      </p>
+      <p className="mt-3 break-all rounded-xl bg-card px-3 py-2 font-mono text-[11px] text-ink-soft">
+        {authorizeTemplate}
+      </p>
     </div>
   )
 }

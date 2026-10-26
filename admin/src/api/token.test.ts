@@ -51,6 +51,8 @@ describe('exchangeAuthorizationCode', () => {
         fetchImpl: fetchImpl as typeof fetch,
       }),
     ).rejects.toThrow('El servidor no ha podido completar la petición.')
+    expect(spy).toHaveBeenCalledWith('API error', 500)
+    expect(JSON.stringify(spy.mock.calls)).not.toContain('secret stack trace')
     spy.mockRestore()
   })
 })

@@ -42,8 +42,7 @@ export function createHttpAdminApi(baseUrl: string): AdminApi {
     }
 
     if (!response.ok) {
-      const detail = await response.text()
-      throw publicApiError(response.status, detail)
+      throw publicApiError(response.status)
     }
     if (response.status === 204) return undefined as T
     return (await response.json()) as T

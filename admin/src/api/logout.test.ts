@@ -32,6 +32,15 @@ describe('requestApiLogout', () => {
     expect(url).toContain(`https://${host}/logout`)
   })
 
+  it('returns null on an error status and logs only that status', async () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const fetchImpl: typeof fetch = async () => new Response('secret stack trace', { status: 502 })
+    await expect(requestApiLogout('https://api.example', host, fetchImpl)).resolves.toBeNull()
+    expect(spy).toHaveBeenCalledWith('API error', 502)
+    expect(JSON.stringify(spy.mock.calls)).not.toContain('secret stack trace')
+    spy.mockRestore()
+  })
+
   it('returns null when the API URL is not the configured host', async () => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
     const fetchImpl: typeof fetch = async () =>

@@ -142,7 +142,6 @@ export function takeOAuthCallback(input: {
   input.replaceUrl(stripAuthParams(input.href))
 
   if (oauthError) {
-    console.error('Cognito error', oauthError)
     clearOAuthRequest(input.storage)
     return { kind: 'error', message: 'Cognito no ha completado el acceso.' }
   }

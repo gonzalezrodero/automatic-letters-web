@@ -18,7 +18,7 @@ export async function requestApiLogout(
       credentials: 'include',
     })
     if (!response.ok) {
-      console.error('API error', response.status, (await response.text()).slice(0, 2000))
+      console.error('API error', response.status)
       return null
     }
     const body = (await response.json()) as { cognitoLogoutUrl?: unknown }
