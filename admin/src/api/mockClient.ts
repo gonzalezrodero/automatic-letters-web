@@ -69,7 +69,7 @@ export function createMockAdminApi(): AdminApi {
 
   const requireTenant = (tenantId: string): TenantProfile => {
     const tenant = db.tenants.find((item) => item.id === tenantId)
-    if (!tenant) throw new Error('No existe esta organización.')
+    if (!tenant) throw new Error('No encontramos esa organización. Vuelve a la lista e inténtalo de nuevo.')
     return tenant
   }
 
@@ -86,7 +86,7 @@ export function createMockAdminApi(): AdminApi {
       await wait(120)
       const tenant = requireTenant(tenantId)
       const privacyPolicyUrl = safeNavigationUrl(patch.privacyPolicyUrl)
-      if (!privacyPolicyUrl) throw new Error('La política de privacidad tiene que ser https. En local también vale http://localhost.')
+      if (!privacyPolicyUrl) throw new Error('El enlace de privacidad tiene que ser una dirección web segura (https).')
       tenant.systemPrompt = patch.systemPrompt
       tenant.privacyPolicyUrl = privacyPolicyUrl
       persist()
@@ -127,7 +127,7 @@ export function createMockAdminApi(): AdminApi {
       requireTenant(tenantId)
       const mime = mimeFromName(file.name, file.type)
       if (!mime) {
-        throw new Error('Solo aceptamos PDF, Markdown o texto (.pdf, .md, .txt).')
+        throw new Error('Solo aceptamos PDF o texto (.pdf, .txt, .md).')
       }
       const document: KnowledgeDocument = {
         id: `doc-${crypto.randomUUID()}`,

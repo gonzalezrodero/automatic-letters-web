@@ -4,7 +4,7 @@ import { publicApiError } from './errors'
 import { conversationSearchParams } from './query'
 import type { AdminApi, AnsweredQuestion, Conversation, DashboardStats, KnowledgeDocument, TenantProfile, TenantSettingsPatch, UnansweredQuestion } from './types'
 
-const MISSING_SESSION = 'No hay sesión con el API. Entra con Cognito.'
+const MISSING_SESSION = 'Tu sesión ha caducado. Entra de nuevo para continuar.'
 
 /**
  * Real client for the .NET API. Unused while VITE_API_BASE is empty.
@@ -36,14 +36,13 @@ export function createHttpAdminApi(baseUrl: string): AdminApi {
         headers,
         credentials: 'include',
       })
-    } catch (error) {
-      console.error('API error', error)
-      throw new Error('No se ha podido contactar con el servidor.')
+    } catch {
+      console.error('access')
+      throw new Error('No hemos podido conectar. Comprueba tu conexión y vuelve a intentarlo.')
     }
 
     if (!response.ok) {
-      const detail = await response.text()
-      throw publicApiError(response.status, detail)
+      throw publicApiError(response.status)
     }
     if (response.status === 204) return undefined as T
     return (await response.json()) as T
@@ -108,7 +107,7 @@ export function createHttpAdminApi(baseUrl: string): AdminApi {
       return request<void>(endpoints.discardUnanswered(tenantId, questionId), { method: 'DELETE' })
     },
     async resetDemo() {
-      throw new Error('Restablecer la demo solo existe en el cliente simulado.')
+      throw new Error('Esta acción solo está en la demostración.')
     },
   }
 }

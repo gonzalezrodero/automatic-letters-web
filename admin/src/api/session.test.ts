@@ -18,10 +18,12 @@ describe('fetchSessionProfile', () => {
     expect(session?.email).toBe('ada@example.com')
   })
 
-  it('returns null on 401', async () => {
+  it('returns null on 401 and logs only the status', async () => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
     const fetchImpl: typeof fetch = async () => new Response('no cookie', { status: 401 })
     await expect(fetchSessionProfile('https://api.example', fetchImpl)).resolves.toBeNull()
+    expect(spy).toHaveBeenCalledWith('API error', 401)
+    expect(JSON.stringify(spy.mock.calls)).not.toContain('no cookie')
     spy.mockRestore()
   })
 })

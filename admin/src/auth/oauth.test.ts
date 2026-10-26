@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { createHash } from 'node:crypto'
 import {
   buildAuthorizeUrl,
@@ -141,5 +141,24 @@ describe('takeOAuthCallback', () => {
     expect(stripAuthParams('https://admin.core-webhook.eu/auth/callback?code=abc&state=s&keep=1')).toBe(
       '/auth/callback?keep=1',
     )
+  })
+
+  it('shows a generic message and does not log the provider description', () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    let next = ''
+    const result = takeOAuthCallback({
+      href: 'https://admin.core-webhook.eu/auth/callback?error=access_denied&error_description=not%20in%20group%20admin',
+      storage: memoryStorage(),
+      replaceUrl: (value) => {
+        next = value
+      },
+    })
+    expect(result).toEqual({
+      kind: 'error',
+      message: 'No hemos podido iniciar tu sesión. Vuelve a entrar desde la pantalla de acceso.',
+    })
+    expect(next).toBe('/auth/callback')
+    expect(spy).not.toHaveBeenCalled()
+    spy.mockRestore()
   })
 })

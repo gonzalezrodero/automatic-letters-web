@@ -107,11 +107,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       ready,
       accounts,
       login(email, password) {
-        if (base) return 'Con el API configurado el acceso es solo con Cognito.'
-        if (!import.meta.env.DEV) return 'Este portal no tiene el API configurado.'
+        if (base) return 'Entra con tu cuenta. El formulario de prueba no sirve aquí.'
+        if (!import.meta.env.DEV) return 'El acceso no está disponible ahora mismo. Vuelve a intentarlo más tarde.'
         const account = ACCOUNTS.find((item) => item.email.toLowerCase() === email.trim().toLowerCase())
         if (!account) return 'No reconocemos esta cuenta de demostración.'
-        if (account.password !== password) return 'Contraseña incorrecta. En la demo es «demo».'
+        if (account.password !== password) return 'Contraseña incorrecta. En la demostración es «demo».'
         const next = sessionFromGroups(account.email, account.name, account.groups)
         persistDemoSession(next)
         setSession(next)

@@ -1,12 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
-import {
-  COGNITO_AUTHORIZE_TEMPLATE,
-  cognitoConfigured,
-  cognitoLogoutUrl,
-  cognitoRedirectUri,
-  startCognitoLogin,
-} from '../auth/cognito'
+import { cognitoConfigured, cognitoLogoutUrl, startCognitoLogin } from '../auth/cognito'
 import { decideCognitoResume, markCognitoRelogin } from '../auth/oauth'
 import { safeInternalPath } from '../lib/safeUrl'
 import { apiConfigured } from '../api'
@@ -49,10 +43,9 @@ export function LoginPage() {
           return
         }
         window.location.assign(url)
-      } catch (reason) {
-        console.error(reason)
+      } catch {
         setRestarting(false)
-        setError('No se pudo iniciar el acceso con Cognito.')
+        setError('No hemos podido iniciar tu sesión. Vuelve a entrar desde la pantalla de acceso.')
       }
     })()
   }, [ready, session])
@@ -91,9 +84,8 @@ export function LoginPage() {
         return
       }
       window.location.assign(url)
-    } catch (reason) {
-      console.error(reason)
-      setError('No se pudo iniciar el acceso con Cognito.')
+    } catch {
+      setError('No hemos podido iniciar tu sesión. Vuelve a entrar desde la pantalla de acceso.')
     }
   }
 
@@ -107,7 +99,8 @@ export function LoginPage() {
             El bot de cada club, visto desde dentro.
           </h1>
           <p className="mt-5 text-lg leading-relaxed text-white/70">
-            Conversaciones, documentos del RAG y la personalidad del asistente. Un grupo de Cognito por tenant, y el grupo admin para cambiar de organización.
+            Conversaciones, documentos y la forma de hablar del asistente. Puedes cambiar de
+            organización si tu cuenta lo permite.
           </p>
         </div>
         <div className="max-w-sm rounded-3xl bg-white/10 p-4 ring-1 ring-white/15">
@@ -127,8 +120,8 @@ export function LoginPage() {
           <h2 className="font-display text-4xl">Entra al portal</h2>
           <p className="mt-2 text-ink-soft">
             {usingApi
-              ? 'El acceso es con Cognito. El formulario de demostración no se usa con el API.'
-              : 'Pantalla visual. En producción este formulario lo sustituye Cognito Hosted UI.'}
+              ? 'Entra con tu cuenta.'
+              : 'Esto es una prueba. En el portal real entrarás con tu cuenta.'}
           </p>
 
           {showDemoForm ? (
@@ -181,25 +174,13 @@ export function LoginPage() {
             disabled={restarting}
             className={`${usingApi ? 'mt-8 ' : ''}w-full rounded-2xl border border-line bg-card py-3 font-semibold hover:border-moss disabled:opacity-60`}
           >
-            {restarting ? 'Abriendo el acceso…' : 'Continuar con Cognito'}
+            {restarting ? 'Un momento…' : 'Entrar con mi cuenta'}
           </button>
 
           {showCognito ? (
-            <div className="mt-4 rounded-2xl border border-line bg-sand/60 p-4 text-sm leading-relaxed">
-              <p className="font-medium">Aquí iría el Hosted UI</p>
-              <p className="mt-2 text-ink-soft">
-                Con <code className="text-ink">VITE_COGNITO_DOMAIN</code> y{' '}
-                <code className="text-ink">VITE_COGNITO_CLIENT_ID</code>, este botón redirige a{' '}
-                <code className="text-ink">/oauth2/authorize</code> con <code className="text-ink">state</code> y
-                PKCE (<code className="text-ink">S256</code>). El callback es{' '}
-                <code className="break-all text-ink">{cognitoRedirectUri()}</code>. El API .NET canjea el código.
-                Si el token trae el grupo <code className="text-ink">admin</code>, esa cuenta es superadmin aunque
-                también tenga un grupo de tenant.
-              </p>
-              <p className="mt-3 break-all rounded-xl bg-card px-3 py-2 font-mono text-[11px] text-ink-soft">
-                {COGNITO_AUTHORIZE_TEMPLATE}
-              </p>
-            </div>
+            <p className="mt-4 rounded-2xl border border-line bg-sand/60 p-4 text-sm leading-relaxed text-ink-soft">
+              El acceso no está disponible ahora mismo. Vuelve a intentarlo más tarde.
+            </p>
           ) : null}
 
           {showDemoForm ? (
@@ -222,7 +203,7 @@ export function LoginPage() {
                       <span className="block text-xs text-ink-soft">{account.email}</span>
                     </span>
                     <span className="text-xs font-medium text-moss-deep">
-                      {account.role === 'superadmin' ? 'Superadmin' : 'Tenant'}
+                      {account.role === 'superadmin' ? 'Administración' : 'Organización'}
                     </span>
                   </button>
                 </li>

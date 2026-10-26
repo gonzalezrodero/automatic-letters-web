@@ -46,7 +46,7 @@ export function UnansweredPage() {
       .catch((reason: unknown) => {
         if (ticket !== view.current) return
         if (isUnavailable(reason)) setUnavailable(true)
-        else setError(reason instanceof Error ? reason.message : 'No se pudieron cargar.')
+        else setError(reason instanceof Error ? reason.message : 'No hemos podido cargar las preguntas. Vuelve a intentarlo.')
       })
     return () => {
       view.current += 1
@@ -77,7 +77,7 @@ export function UnansweredPage() {
       await reload(requested, ticket)
     } catch (reason) {
       if (ticket !== view.current) return
-      setError(reason instanceof Error ? reason.message : 'No se pudo guardar.')
+      setError(reason instanceof Error ? reason.message : 'No hemos podido guardar la respuesta. Vuelve a intentarlo.')
     } finally {
       if (ticket === view.current) setSavingId(null)
     }
@@ -99,7 +99,7 @@ export function UnansweredPage() {
       await reload(requested, ticket)
     } catch (reason) {
       if (ticket !== view.current) return
-      setError(reason instanceof Error ? reason.message : 'No se pudo corregir.')
+      setError(reason instanceof Error ? reason.message : 'No hemos podido corregir la respuesta. Vuelve a intentarlo.')
     } finally {
       if (ticket === view.current) setSavingId(null)
     }
@@ -117,7 +117,7 @@ export function UnansweredPage() {
       await reload(requested, ticket)
     } catch (reason) {
       if (ticket !== view.current) return
-      setError(reason instanceof Error ? reason.message : 'No se pudo descartar.')
+      setError(reason instanceof Error ? reason.message : 'No hemos podido descartar la pregunta. Vuelve a intentarlo.')
     } finally {
       if (ticket === view.current) setSavingId(null)
     }
@@ -135,7 +135,7 @@ export function UnansweredPage() {
       await reload(requested, ticket)
     } catch (reason) {
       if (ticket !== view.current) return
-      setError(reason instanceof Error ? reason.message : 'No se pudo quitar.')
+      setError(reason instanceof Error ? reason.message : 'No hemos podido quitar la respuesta. Vuelve a intentarlo.')
     } finally {
       if (ticket === view.current) setSavingId(null)
     }
@@ -144,7 +144,7 @@ export function UnansweredPage() {
   if (unavailable) {
     return (
       <NotReady
-        title="Las preguntas sin respuesta todavía no están en el API"
+        title="Las preguntas sin respuesta todavía no están disponibles"
         detail="Cuando el bot no sepa algo, esa pregunta aparecerá aquí para añadirla al conocimiento."
       />
     )

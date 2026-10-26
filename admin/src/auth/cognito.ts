@@ -62,14 +62,3 @@ export function cognitoLogoutUrl(): string | null {
   if (!domain || !clientId) return null
   return buildLogoutUrl({ domain, clientId, logoutUri: cognitoLogoutUri() })
 }
-
-export const COGNITO_AUTHORIZE_TEMPLATE = [
-  'https://auth.core-webhook.eu/oauth2/authorize',
-  '?client_id=ADMIN_CLIENT_ID',
-  '&response_type=code',
-  '&scope=openid%20email%20profile',
-  '&redirect_uri=https://admin.core-webhook.eu/auth/callback',
-  '&state=STATE',
-  '&code_challenge=PKCE_S256',
-  '&code_challenge_method=S256',
-].join('')

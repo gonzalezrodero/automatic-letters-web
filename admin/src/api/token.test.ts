@@ -50,7 +50,9 @@ describe('exchangeAuthorizationCode', () => {
         redirectUri: 'https://admin.core-webhook.eu/auth/callback',
         fetchImpl: fetchImpl as typeof fetch,
       }),
-    ).rejects.toThrow('El servidor no ha podido completar la petición.')
+    ).rejects.toThrow('No hemos podido completar la acción. Vuelve a intentarlo dentro de un momento.')
+    expect(spy).toHaveBeenCalledWith('API error', 500)
+    expect(JSON.stringify(spy.mock.calls)).not.toContain('secret stack trace')
     spy.mockRestore()
   })
 })

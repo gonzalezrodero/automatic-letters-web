@@ -10,8 +10,6 @@ interface TokenBody {
   email?: unknown
   name?: unknown
   groups?: unknown
-  accessToken?: unknown
-  refreshToken?: unknown
 }
 
 /**
@@ -41,21 +39,18 @@ export async function exchangeAuthorizationCode(input: {
         redirectUri: input.redirectUri,
       }),
     })
-  } catch (error) {
-    console.error('API error', error)
-    throw new Error('No se ha podido contactar con el servidor.')
+  } catch {
+    console.error('access')
+    throw new Error('No hemos podido conectar. Comprueba tu conexión y vuelve a intentarlo.')
   }
 
   if (!response.ok) {
-    throw publicApiError(response.status, await response.text())
+    throw publicApiError(response.status)
   }
 
   const body = (await response.json()) as TokenBody
-  if (typeof body.refreshToken === 'string' || typeof body.accessToken === 'string') {
-    console.error('API error', 'El API ha devuelto un token en el JSON. El navegador usa la cookie y no lo guarda.')
-  }
   if (typeof body.email !== 'string' || !Array.isArray(body.groups)) {
-    throw new Error('La respuesta de acceso no incluye el perfil.')
+    throw new Error('No hemos podido iniciar tu sesión. Vuelve a entrar desde la pantalla de acceso.')
   }
   const groups = body.groups.filter((group): group is string => typeof group === 'string')
   const name = typeof body.name === 'string' && body.name.trim() ? body.name : body.email
