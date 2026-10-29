@@ -35,8 +35,8 @@ export function ActivityChart({ days }: { days: DayActivity[] }) {
           </g>
         )
       })}
-      <path d={area('received')} fill="#0f7a45" opacity="0.14" />
-      <path d={path('received')} fill="none" stroke="#0f7a45" strokeWidth="2.4" strokeLinejoin="round" strokeLinecap="round" />
+      <path d={area('received')} fill="#0f766e" opacity="0.14" />
+      <path d={path('received')} fill="none" stroke="#0f766e" strokeWidth="2.4" strokeLinejoin="round" strokeLinecap="round" />
       <path d={path('replied')} fill="none" stroke="#1f6f8a" strokeWidth="2.4" strokeLinejoin="round" strokeLinecap="round" />
       {days.map((day, index) =>
         index % 2 === 0 ? (

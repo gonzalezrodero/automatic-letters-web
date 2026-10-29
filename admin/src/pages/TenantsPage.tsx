@@ -119,7 +119,7 @@ function metric(value: number | undefined, settled: boolean): string {
 function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-2xl bg-paper px-2 py-3">
-      <dt className="text-[11px] tracking-wide text-ink-soft uppercase">{label}</dt>
+      <dt className="text-sm text-ink-soft">{label}</dt>
       <dd className="mt-1 font-display text-2xl">{value}</dd>
     </div>
   )

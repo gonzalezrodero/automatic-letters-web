@@ -91,24 +91,15 @@ export function LoginPage() {
 
   return (
     <div className="grid min-h-dvh lg:grid-cols-[1.05fr_0.95fr]">
-      <section className="relative hidden overflow-hidden bg-ink text-white lg:flex lg:flex-col lg:justify-between lg:px-14 lg:py-12">
+      <section className="relative hidden overflow-hidden bg-moss text-paper lg:flex lg:flex-col lg:gap-16 lg:px-14 lg:py-12">
         <Logo light />
         <div className="max-w-md">
-          <p className="text-sm tracking-[0.18em] text-white/50 uppercase">WhatsApp · por organización</p>
-          <h1 className="mt-4 font-display text-5xl leading-[1.05]">
-            El bot de cada club, visto desde dentro.
-          </h1>
-          <p className="mt-5 text-lg leading-relaxed text-white/70">
-            Conversaciones, documentos y la forma de hablar del asistente. Puedes cambiar de
-            organización si tu cuenta lo permite.
+          <p className="font-display text-4xl leading-tight font-bold">
+            Las conversaciones y los documentos de tu negocio.
           </p>
-        </div>
-        <div className="max-w-sm rounded-3xl bg-white/10 p-4 ring-1 ring-white/15">
-          <div className="ml-auto max-w-[85%] rounded-2xl rounded-br-md bg-bot px-3 py-2 text-sm text-ink">
-            El bot responde con lo que hay en los documentos de la organización.
-            <p className="mt-1 text-right text-[11px] text-ink-soft">Bot · 09:14</p>
-          </div>
-          <p className="mt-3 text-xs text-white/45">Vista de demostración</p>
+          <p className="mt-5 text-lg leading-relaxed">
+            Entras, ves lo que han preguntado y lo que el asistente ha contestado.
+          </p>
         </div>
       </section>
 
@@ -117,7 +108,7 @@ export function LoginPage() {
           <div className="mb-8 lg:hidden">
             <Logo />
           </div>
-          <h2 className="font-display text-4xl">Entra al portal</h2>
+          <h1 className="font-display text-4xl font-bold">Entra al portal</h1>
           <p className="mt-2 text-ink-soft">
             {usingApi
               ? 'Entra con tu cuenta.'
@@ -133,7 +124,7 @@ export function LoginPage() {
                 autoComplete="username"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                className="w-full rounded-2xl border border-line bg-card px-4 py-3 outline-none focus:border-moss"
+                className="w-full rounded-md border border-line bg-card px-4 py-3 outline-none focus:border-moss"
                 required
               />
             </label>
@@ -144,14 +135,14 @@ export function LoginPage() {
                 autoComplete="current-password"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
-                className="w-full rounded-2xl border border-line bg-card px-4 py-3 outline-none focus:border-moss"
+                className="w-full rounded-md border border-line bg-card px-4 py-3 outline-none focus:border-moss"
                 required
               />
             </label>
             {error ? <p className="text-sm text-danger">{error}</p> : null}
             <button
               type="submit"
-              className="w-full rounded-2xl bg-moss py-3 font-semibold text-white hover:bg-moss-deep"
+              className="btn-accent w-full rounded-md py-3"
             >
               Entrar
             </button>
@@ -161,7 +152,7 @@ export function LoginPage() {
           {usingApi && error ? <p className="mt-6 text-sm text-danger">{error}</p> : null}
 
           {showDemoForm ? (
-          <div className="my-5 flex items-center gap-3 text-xs tracking-wide text-ink-soft uppercase">
+          <div className="my-5 flex items-center gap-3 text-sm text-ink-soft">
             <span className="h-px flex-1 bg-line" />
             o
             <span className="h-px flex-1 bg-line" />
@@ -172,7 +163,11 @@ export function LoginPage() {
             type="button"
             onClick={onCognito}
             disabled={restarting}
-            className={`${usingApi ? 'mt-8 ' : ''}w-full rounded-2xl border border-line bg-card py-3 font-semibold hover:border-moss disabled:opacity-60`}
+            className={
+              showDemoForm
+                ? 'w-full rounded-md border border-line bg-card py-3 font-semibold hover:border-moss disabled:opacity-60'
+                : 'btn-accent mt-8 w-full rounded-md py-3 disabled:opacity-60'
+            }
           >
             {restarting ? 'Un momento…' : 'Entrar con mi cuenta'}
           </button>
@@ -185,7 +180,7 @@ export function LoginPage() {
 
           {showDemoForm ? (
           <div className="mt-8">
-            <p className="text-xs tracking-[0.14em] text-ink-soft uppercase">Cuentas de demostración</p>
+            <p className="text-sm font-bold text-ink">Cuentas de demostración</p>
             <ul className="mt-3 space-y-2">
               {accounts.map((account) => (
                 <li key={account.email}>
@@ -196,7 +191,7 @@ export function LoginPage() {
                       setPassword(account.password)
                       setError(null)
                     }}
-                    className="flex w-full items-center justify-between rounded-2xl border border-line bg-card px-4 py-3 text-left hover:border-moss"
+                    className="flex w-full items-center justify-between rounded-md border border-line bg-card px-4 py-3 text-left hover:border-moss"
                   >
                     <span>
                       <span className="block text-sm font-medium">{account.name}</span>
@@ -209,9 +204,14 @@ export function LoginPage() {
                 </li>
               ))}
             </ul>
-            <p className="mt-3 text-xs text-ink-soft">Contraseña de todas: demo. No sale de este navegador.</p>
+            <p className="mt-3 text-sm text-ink-soft">Contraseña de todas: demo. No sale de este navegador.</p>
           </div>
           ) : null}
+          <p className="mt-8 text-sm">
+            <a className="font-bold text-moss-deep underline" href="https://www.core-webhook.eu/">
+              Volver a la página principal
+            </a>
+          </p>
         </div>
       </section>
     </div>

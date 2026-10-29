@@ -1,13 +1,18 @@
-# Core Webhook
+# Automatic Letters
 
-Static site for [www.core-webhook.eu](https://www.core-webhook.eu) plus a clickable admin portal for **Automatic Letters**, the multi-tenant WhatsApp RAG chatbot.
+Static site for [www.core-webhook.eu](https://www.core-webhook.eu) plus the admin portal for **Automatic Letters**, a multi-tenant WhatsApp assistant. The public pages do not call Google Fonts or any other third party.
 
 The files at the repository root are the public site and must stay where they are:
 
-- `index.html` — landing page
-- `privacy.html` — privacy policy
+- `index.html` — sales page, with a canned WhatsApp example (no backend, no data collected)
+- `site.css` — shared styles for the public pages
+- `favicon.svg` — shared mark
+- `fonts/` — self-hosted Familjen Grotesk (SIL Open Font License; see `fonts/OFL.txt`). The same file is copied to `admin/src/fonts/` because the portal is built and hosted on its own.
+- `privacy.html` — privacy policy (wording is under legal review; do not edit the policy text)
 - `data-deletion.html` — GDPR deletion instructions (`BORRAR DATOS`)
 - `CNAME` — `www.core-webhook.eu`
+
+The portal login on the public site points at `https://admin.core-webhook.eu/login`, the host that actually runs the app. `/admin/` on GitHub Pages is the Vite source and does not boot.
 
 The portal lives in [`admin/`](admin/) and does not replace those pages.
 
@@ -73,7 +78,7 @@ VITE_API_BASE=https://api.example VITE_COGNITO_DOMAIN=auth.example VITE_COGNITO_
 - SPA fallback: `public/_redirects` (`/* /index.html 200`), copied into `dist`
 - Headers: `public/_headers`, also copied into `dist`
 
-`_headers` sends a Content-Security-Policy that matches this app: scripts and styles from `'self'`, Google Fonts (`fonts.googleapis.com` / `fonts.gstatic.com`), `style-src-attr 'unsafe-inline'` because the charts set `style` on elements, `connect-src` for `https://api.core-webhook.eu` and `https://api.dev.core-webhook.eu`, and `frame-ancestors 'none'`. `frame-ancestors` only works as an HTTP header, which is why this deploy is preferred over GitHub Pages. If the API origin changes, edit `connect-src` in `admin/public/_headers`.
+`_headers` sends a Content-Security-Policy that matches this app: scripts, styles, and fonts from `'self'` (Familjen Grotesk is bundled with the build; there is no Google Fonts request), `style-src-attr 'unsafe-inline'` because the charts set `style` on elements, `connect-src` for `https://api.core-webhook.eu` and `https://api.dev.core-webhook.eu`, and `frame-ancestors 'none'`. `frame-ancestors` only works as an HTTP header, which is why this deploy is preferred over GitHub Pages. If the API origin changes, edit `connect-src` in `admin/public/_headers`.
 
 Cognito redirect URI: `https://admin.core-webhook.eu/auth/callback`. Logout URI: `https://admin.core-webhook.eu/login`.
 
