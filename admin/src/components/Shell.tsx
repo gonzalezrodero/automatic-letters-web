@@ -63,13 +63,13 @@ export function Shell() {
 
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-40 flex w-[260px] flex-col bg-ink text-white transition-transform lg:static lg:translate-x-0',
+          'fixed inset-y-0 left-0 z-40 flex w-[260px] flex-col bg-moss text-paper transition-transform lg:static lg:translate-x-0',
           open ? 'translate-x-0' : '-translate-x-full',
         )}
       >
         <div className="flex items-center justify-between px-5 py-5">
           <Logo light />
-          <button type="button" className="rounded-lg p-1 text-white/70 lg:hidden" onClick={() => setOpen(false)} aria-label="Cerrar">
+          <button type="button" className="rounded-lg p-1 text-paper lg:hidden" onClick={() => setOpen(false)} aria-label="Cerrar">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -82,8 +82,8 @@ export function Shell() {
               end={link.end}
               className={({ isActive }) =>
                 cn(
-                  'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white',
-                  isActive && 'bg-white/15 text-white',
+                  'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-paper hover:bg-white/10',
+                  isActive && 'bg-moss-deep text-paper',
                 )
               }
             >
@@ -96,8 +96,8 @@ export function Shell() {
               to="/organizaciones"
               className={({ isActive }) =>
                 cn(
-                  'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white',
-                  isActive && 'bg-white/15 text-white',
+                  'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-paper hover:bg-white/10',
+                  isActive && 'bg-moss-deep text-paper',
                 )
               }
             >
@@ -114,7 +114,7 @@ export function Shell() {
             </span>
             <div className="min-w-0">
               <p className="truncate text-sm font-medium">{session?.name}</p>
-              <p className="truncate text-xs text-white/55">
+              <p className="truncate text-xs text-paper">
                 {superadmin ? 'Administración' : shortLabel}
               </p>
             </div>
@@ -122,7 +122,7 @@ export function Shell() {
           <button
             type="button"
             onClick={logout}
-            className="mt-3 flex w-full items-center gap-2 rounded-xl px-2 py-2 text-sm text-white/70 hover:bg-white/10 hover:text-white"
+            className="mt-3 flex w-full items-center gap-2 rounded-xl px-2 py-2 text-sm text-paper hover:bg-white/10"
           >
             <LogOut className="h-4 w-4" />
             Cerrar sesión

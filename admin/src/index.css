@@ -1,19 +1,32 @@
 @import 'tailwindcss';
 
+@font-face {
+  font-family: "Familjen Grotesk";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("./fonts/familjen-grotesk-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 @theme {
-  --font-sans: 'Outfit', ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'Fraunces', ui-serif, Georgia, serif;
-  --color-ink: #14241c;
-  --color-ink-soft: #5c6d63;
-  --color-paper: #f3efe6;
-  --color-card: #fffdf8;
-  --color-line: #e4dccb;
-  --color-moss: #0f7a45;
-  --color-moss-deep: #0b5c34;
-  --color-foam: #e6f6ec;
-  --color-sand: #efe4d2;
-  --color-bot: #d8f5cc;
+  --font-sans: "Familjen Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Familjen Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --color-ink: #1c1917;
+  --color-ink-soft: #3d4f4a;
+  --color-paper: #fffbeb;
+  --color-card: #fffef8;
+  --color-line: #e4d7b8;
+  --color-moss: #0f766e;
+  --color-moss-deep: #115e59;
+  --color-foam: #ccfbf1;
+  --color-sand: #f3ead3;
+  --color-bot: #d7f3ee;
   --color-danger: #9f2d2d;
+  --color-accent: #f97316;
+  --color-accent-deep: #ea580c;
+  --color-accent-ink: #1c1917;
+  --color-ember: #c2410c;
 }
 
 html,
@@ -27,20 +40,60 @@ body {
   background: var(--color-paper);
   color: var(--color-ink);
   font-family: var(--font-sans);
+  color-scheme: light;
+}
+
+h1,
+h2,
+h3,
+.font-display {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
 }
 
 ::selection {
-  background: #cfead9;
+  background: #115e59;
+  color: #fffbeb;
+}
+
+:focus-visible {
+  outline: 2px solid #0f766e;
+  outline-offset: 2px;
+}
+
+input,
+textarea,
+select {
+  caret-color: #0f766e;
 }
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: #d5ccbc transparent;
+  scrollbar-color: #cfc4a4 transparent;
+}
+
+/* The orange action keeps near-black text. White on #F97316 is below WCAG AA. */
+.btn-accent {
+  border: 2px solid var(--color-ember);
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+  font-weight: 700;
+}
+
+.btn-accent:hover {
+  background: var(--color-accent-deep);
+}
+
+.btn-accent:disabled {
+  opacity: 0.6;
 }
 
 .chat-canvas {
-  background-color: #efe6d8;
-  background-image: radial-gradient(rgba(20, 36, 28, 0.045) 1.1px, transparent 1.1px);
+  background-color: #f4ecd4;
+  background-image: radial-gradient(rgba(28, 25, 23, 0.05) 1.1px, transparent 1.1px);
   background-size: 16px 16px;
 }
 

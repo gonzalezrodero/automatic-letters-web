@@ -112,7 +112,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
         <div className="max-w-md">
           <h1 className="font-display text-3xl">Sin acceso a una organización</h1>
           <p className="mt-3 text-sm leading-relaxed text-ink-soft">
-            Tu cuenta no tiene acceso a una organización. Pide acceso a quien administra tu club.
+            Tu cuenta no tiene acceso a una organización. Pide acceso a quien administra tu negocio.
           </p>
           <button
             type="button"
