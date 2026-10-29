@@ -101,6 +101,30 @@ export function LoginPage() {
             Entras, ves lo que han preguntado y lo que el asistente ha contestado.
           </p>
         </div>
+        <aside className="mt-auto w-full max-w-sm" aria-label="Conversación de ejemplo">
+          <div className="overflow-hidden rounded-2xl border border-paper/40 bg-card text-ink shadow-lg">
+            <div className="bg-moss-deep px-4 py-3 text-paper">
+              <p className="font-bold">El Mostrador</p>
+              <p className="mt-0.5 text-sm">Negocio inventado. Solo un ejemplo.</p>
+            </div>
+            <div className="chat-canvas flex flex-col gap-2.5 px-3 py-3">
+              <div className="flex justify-end">
+                <div className="bubble-out max-w-[88%] bg-bot px-3 py-2 text-sm leading-snug">
+                  <p>¿A qué hora abrís?</p>
+                </div>
+              </div>
+              <div className="flex justify-start">
+                <div className="bubble-in max-w-[88%] bg-card px-3 py-2 text-sm leading-snug">
+                  <p className="font-bold text-moss-deep">Asistente</p>
+                  <p className="mt-0.5">
+                    Abrimos de lunes a viernes, de 9:00 a 13:30 y de 16:30 a 20:00. Los sábados, de
+                    10:00 a 14:00. Los domingos cerramos.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
       </section>
 
       <section className="flex items-center justify-center px-5 py-10">
