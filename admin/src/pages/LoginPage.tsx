@@ -91,36 +91,50 @@ export function LoginPage() {
 
   return (
     <div className="grid min-h-dvh lg:grid-cols-[1.05fr_0.95fr]">
-      <section className="relative hidden overflow-hidden bg-moss text-paper lg:flex lg:flex-col lg:gap-16 lg:px-14 lg:py-12">
+      <section className="relative hidden bg-moss text-paper lg:flex lg:min-h-dvh lg:flex-col lg:px-12 lg:pt-8 xl:px-14 xl:pt-12">
         <Logo light />
-        <div className="max-w-md">
+        <div className="mt-6 max-w-lg xl:mt-12">
           <p className="font-display text-4xl leading-tight font-bold">
             Las conversaciones y los documentos de tu negocio.
           </p>
-          <p className="mt-5 text-lg leading-relaxed">
+          <p className="mt-3 text-lg leading-relaxed xl:mt-5">
             Entras, ves lo que han preguntado y lo que el asistente ha contestado.
           </p>
         </div>
-        <aside className="mt-auto w-full max-w-sm" aria-label="Conversación de ejemplo">
-          <div className="overflow-hidden rounded-2xl border border-paper/40 bg-card text-ink shadow-lg">
-            <div className="bg-moss-deep px-4 py-3 text-paper">
-              <p className="font-bold">El Mostrador</p>
-              <p className="mt-0.5 text-sm">Negocio inventado. Solo un ejemplo.</p>
-            </div>
-            <div className="chat-canvas flex flex-col gap-2.5 px-3 py-3">
-              <div className="flex justify-end">
-                <div className="bubble-out max-w-[88%] bg-bot px-3 py-2 text-sm leading-snug">
-                  <p>¿A qué hora abrís?</p>
-                </div>
+        <aside
+          className="mt-6 -mx-12 flex min-h-0 flex-1 flex-col xl:mt-10 xl:-mx-14"
+          aria-label="Conversación de ejemplo"
+        >
+          <div className="bg-moss-deep px-12 py-3 xl:px-14 xl:py-3.5">
+            <p className="text-lg font-bold">El Mostrador</p>
+            <p className="mt-0.5 text-sm">Negocio inventado. Solo un ejemplo.</p>
+          </div>
+          <div className="chat-canvas flex flex-1 flex-col gap-2.5 px-12 py-4 text-ink xl:gap-4 xl:px-14 xl:py-6">
+            <div className="flex justify-end">
+              <div className="bubble-out max-w-[80%] bg-bot px-3.5 py-2.5 text-base leading-snug shadow-sm xl:px-4 xl:py-3 xl:text-lg">
+                <p>¿A qué hora abrís?</p>
               </div>
-              <div className="flex justify-start">
-                <div className="bubble-in max-w-[88%] bg-card px-3 py-2 text-sm leading-snug">
-                  <p className="font-bold text-moss-deep">Asistente</p>
-                  <p className="mt-0.5">
-                    Abrimos de lunes a viernes, de 9:00 a 13:30 y de 16:30 a 20:00. Los sábados, de
-                    10:00 a 14:00. Los domingos cerramos.
-                  </p>
-                </div>
+            </div>
+            <div className="flex justify-start">
+              <div className="bubble-in max-w-[80%] bg-card px-3.5 py-2.5 text-base leading-snug shadow-sm xl:px-4 xl:py-3 xl:text-lg">
+                <p className="text-sm font-bold text-moss-deep xl:text-base">Asistente</p>
+                <p className="mt-1">
+                  Abrimos de lunes a viernes, de 9:00 a 13:30 y de 16:30 a 20:00. Los sábados, de
+                  10:00 a 14:00. Los domingos cerramos.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <div className="bubble-out max-w-[80%] bg-bot px-3.5 py-2.5 text-base leading-snug shadow-sm xl:px-4 xl:py-3 xl:text-lg">
+                <p>¿Dónde estáis?</p>
+              </div>
+            </div>
+            <div className="flex justify-start">
+              <div className="bubble-in max-w-[80%] bg-card px-3.5 py-2.5 text-base leading-snug shadow-sm xl:px-4 xl:py-3 xl:text-lg">
+                <p className="text-sm font-bold text-moss-deep xl:text-base">Asistente</p>
+                <p className="mt-1">
+                  Estamos en la calle Mayor, número 12. El autobús para en la puerta.
+                </p>
               </div>
             </div>
           </div>
