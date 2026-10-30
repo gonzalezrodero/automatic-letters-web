@@ -1,3 +1,7 @@
+import { readFile } from 'node:fs/promises'
+import { extname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page, type Route } from '@playwright/test'
 
 /**
@@ -104,6 +108,72 @@ function assertClean(problems: Problems) {
   expect(problems.consoleErrors, 'console errors').toEqual([])
   expect(problems.httpFailures, 'failed requests').toEqual([])
   expect(problems.blocked, 'requests outside the app and the mocked API').toEqual([])
+}
+
+/**
+ * Fail on serious and critical axe violations.
+ * Moderate and minor results do not fail the build. Incomplete results do not
+ * either: axe reports single-character chart labels as incomplete
+ * color-contrast ("content is too short"), which is not a measured failure.
+ * Those labels use ink-soft (#3d4f4a), about 8.6:1 on the card.
+ */
+async function expectNoSeriousAxeViolations(page: Page) {
+  await page.evaluate(async () => {
+    await document.fonts.ready
+  })
+  const results = await new AxeBuilder({ page }).analyze()
+  const violations = results.violations.filter(
+    (violation) => violation.impact === 'serious' || violation.impact === 'critical',
+  )
+  const detail = violations
+    .map((violation) => {
+      const nodes = violation.nodes.map((node) => `  ${node.target.join(' ')}`).join('\n')
+      return `${violation.id} (${violation.impact}): ${violation.help}\n${nodes}`
+    })
+    .join('\n')
+  expect(violations, detail || 'serious or critical axe violations').toEqual([])
+}
+
+const repoRoot = fileURLToPath(new URL('../..', import.meta.url))
+
+const landingFiles: Record<string, string> = {
+  '/': 'index.html',
+  '/index.html': 'index.html',
+  '/site.css': 'site.css',
+  '/favicon.svg': 'favicon.svg',
+  '/favicon.ico': 'favicon.svg',
+  '/fonts/familjen-grotesk-latin.woff2': 'fonts/familjen-grotesk-latin.woff2',
+}
+
+function landingType(file: string): string {
+  switch (extname(file)) {
+    case '.html':
+      return 'text/html; charset=utf-8'
+    case '.css':
+      return 'text/css; charset=utf-8'
+    case '.svg':
+      return 'image/svg+xml'
+    case '.woff2':
+      return 'font/woff2'
+    default:
+      return 'application/octet-stream'
+  }
+}
+
+/** Repo-root landing files, fulfilled on the existing preview origin. No extra server. */
+async function installLanding(page: Page, problems: Problems) {
+  await page.route('**/*', async (route) => {
+    const url = new URL(route.request().url())
+    const relative = landingFiles[url.pathname]
+    const local = url.hostname === '127.0.0.1' || url.hostname === 'localhost'
+    if (local && relative) {
+      const body = await readFile(join(repoRoot, relative))
+      await route.fulfill({ status: 200, contentType: landingType(relative), body })
+      return
+    }
+    problems.blocked.push(route.request().url())
+    await route.abort()
+  })
 }
 
 async function fulfillJson(route: Route, status: number, body: unknown) {
@@ -252,6 +322,7 @@ test('production login shows Cognito and the example conversation, not the demo 
   await expect(example.getByText('¿Dónde estáis?')).toBeVisible()
   await expect(page).toHaveURL(/\/admin\/login$/)
   await expectNoHorizontalOverflow(page)
+  await expectNoSeriousAxeViolations(page)
 
   for (const viewport of loginViewports) {
     await page.setViewportSize(viewport)
@@ -280,6 +351,7 @@ test('production login shows Cognito and the example conversation, not the demo 
   await expect(page.locator('input[type="password"]')).toHaveCount(0)
   await expectNoDocumentScroll(page)
   await expectNoHorizontalOverflow(page)
+  await expectNoSeriousAxeViolations(page)
 
   assertClean(problems)
 })
@@ -354,6 +426,8 @@ test('authenticated pages load without console errors or failed requests', async
   await page.goto('/admin/')
   await expect(page.getByRole('heading', { level: 1, name: 'Hola, Ada' })).toBeVisible()
   await expect(page.getByText('Semana del 24–30 oct')).toBeVisible()
+  await page.waitForLoadState('networkidle')
+  await expectNoSeriousAxeViolations(page)
 
   const nav = page.getByRole('navigation', { name: 'Secciones' })
   const sections: Array<{ link: string; heading: string; url: RegExp; settled: string }> = [
@@ -381,5 +455,16 @@ test('authenticated pages load without console errors or failed requests', async
   await expect(page.getByText('Horario').first()).toBeVisible()
   await page.waitForLoadState('networkidle')
 
+  assertClean(problems)
+})
+
+test('landing page has no serious or critical accessibility violations', async ({ page }) => {
+  const problems = watch(page)
+  await installLanding(page, problems)
+  await page.setViewportSize({ width: 1280, height: 800 })
+  await page.goto('/')
+  await expect(page.getByRole('heading', { level: 1, name: 'Las preguntas de siempre, contestadas en WhatsApp.' })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Escríbenos' }).first()).toBeVisible()
+  await expectNoSeriousAxeViolations(page)
   assertClean(problems)
 })
