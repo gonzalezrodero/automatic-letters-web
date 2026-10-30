@@ -1,6 +1,10 @@
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { defineConfig, devices } from '@playwright/test'
 
 const port = 4173
+const sitePort = 4174
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 
 /**
  * Chromium-only smoke tests against `vite preview`.
@@ -33,19 +37,30 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  webServer: {
-    command: 'npm run preview',
-    url: `http://127.0.0.1:${port}/admin/`,
-    reuseExistingServer: !process.env.CI,
-    timeout: 30_000,
-    stdout: 'ignore',
-    stderr: 'pipe',
-    // vite.config.ts refuses to boot in production mode unless these are set.
-    // They are already inlined into dist by `npm run build`; preview only re-reads them.
-    env: {
-      VITE_API_BASE: 'https://api.example.invalid',
-      VITE_COGNITO_DOMAIN: 'auth.example.invalid',
-      VITE_COGNITO_CLIENT_ID: 'ci-client',
+  webServer: [
+    {
+      command: 'npm run preview',
+      url: `http://127.0.0.1:${port}/admin/`,
+      reuseExistingServer: !process.env.CI,
+      timeout: 30_000,
+      stdout: 'ignore',
+      stderr: 'pipe',
+      // vite.config.ts refuses to boot in production mode unless these are set.
+      // They are already inlined into dist by `npm run build`; preview only re-reads them.
+      env: {
+        VITE_API_BASE: 'https://api.example.invalid',
+        VITE_COGNITO_DOMAIN: 'auth.example.invalid',
+        VITE_COGNITO_CLIENT_ID: 'ci-client',
+      },
     },
-  },
+    {
+      command: `python3 -m http.server ${sitePort} --bind 127.0.0.1`,
+      cwd: repoRoot,
+      url: `http://127.0.0.1:${sitePort}/`,
+      reuseExistingServer: !process.env.CI,
+      timeout: 15_000,
+      stdout: 'ignore',
+      stderr: 'pipe',
+    },
+  ],
 })

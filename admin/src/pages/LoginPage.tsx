@@ -90,26 +90,26 @@ export function LoginPage() {
   }
 
   return (
-    <div className="grid min-h-dvh lg:grid-cols-[1.05fr_0.95fr]">
-      <section className="relative hidden bg-moss text-paper lg:flex lg:min-h-dvh lg:flex-col lg:px-12 lg:pt-8 xl:px-14 xl:pt-12">
+    <div className="login-screen grid min-h-dvh lg:grid-cols-[1.05fr_0.95fr]">
+      <section className="login-story relative hidden bg-moss text-paper lg:flex lg:px-12 xl:px-14">
         <Logo light />
-        <div className="mt-6 max-w-lg xl:mt-12">
+        <div className="login-intro max-w-lg">
           <p className="font-display text-4xl leading-tight font-bold">
             Las conversaciones y los documentos de tu negocio.
           </p>
-          <p className="mt-3 text-lg leading-relaxed xl:mt-5">
+          <p className="login-lede text-lg leading-relaxed">
             Entras, ves lo que han preguntado y lo que el asistente ha contestado.
           </p>
         </div>
         <aside
-          className="mt-6 -mx-12 flex min-h-0 flex-1 flex-col xl:mt-10 xl:-mx-14"
+          className="login-aside -mx-12 flex min-h-0 flex-1 flex-col xl:-mx-14"
           aria-label="Conversación de ejemplo"
         >
-          <div className="bg-moss-deep px-12 py-3 xl:px-14 xl:py-3.5">
+          <div className="login-bar bg-moss-deep px-12 xl:px-14">
             <p className="text-lg font-bold">El Mostrador</p>
             <p className="mt-0.5 text-sm">Negocio inventado. Solo un ejemplo.</p>
           </div>
-          <div className="chat-canvas flex flex-1 flex-col gap-2.5 px-12 py-4 text-ink xl:gap-4 xl:px-14 xl:py-6">
+          <div className="login-chat chat-canvas flex min-h-0 flex-1 flex-col px-12 text-ink xl:px-14">
             <div className="flex justify-end">
               <div className="bubble-out max-w-[80%] bg-bot px-3.5 py-2.5 text-base leading-snug shadow-sm xl:px-4 xl:py-3 xl:text-lg">
                 <p>¿A qué hora abrís?</p>
@@ -124,12 +124,12 @@ export function LoginPage() {
                 </p>
               </div>
             </div>
-            <div className="flex justify-end">
+            <div className="login-more flex justify-end">
               <div className="bubble-out max-w-[80%] bg-bot px-3.5 py-2.5 text-base leading-snug shadow-sm xl:px-4 xl:py-3 xl:text-lg">
                 <p>¿Dónde estáis?</p>
               </div>
             </div>
-            <div className="flex justify-start">
+            <div className="login-more flex justify-start">
               <div className="bubble-in max-w-[80%] bg-card px-3.5 py-2.5 text-base leading-snug shadow-sm xl:px-4 xl:py-3 xl:text-lg">
                 <p className="text-sm font-bold text-moss-deep xl:text-base">Asistente</p>
                 <p className="mt-1">
@@ -141,7 +141,7 @@ export function LoginPage() {
         </aside>
       </section>
 
-      <section className="flex items-center justify-center px-5 py-10">
+      <section className="login-panel flex min-h-0 items-center justify-center px-5 py-10">
         <div className="w-full max-w-md">
           <div className="mb-8 lg:hidden">
             <Logo />
