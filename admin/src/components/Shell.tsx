@@ -18,6 +18,13 @@ import { cn, initials } from '../lib/format'
 import { tenantPlaceLine, tenantShortLabel, tenantTitle } from '../lib/tenantLabel'
 import { Logo } from './Logo'
 
+function tabbable(root: HTMLElement): HTMLElement[] {
+  return [...root.querySelectorAll<HTMLElement>('a[href], button:not([disabled])')].filter((node) => {
+    if (node.getAttribute('tabindex') === '-1') return false
+    return node.getClientRects().length > 0
+  })
+}
+
 const links = [
   { to: '/', label: 'Panel', icon: LayoutDashboard, end: true },
   { to: '/conversaciones', label: 'Conversaciones', icon: MessagesSquare, end: false },
@@ -32,6 +39,10 @@ export function Shell() {
   const location = useLocation()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
+  const menuButtonRef = useRef<HTMLButtonElement>(null)
+  const closeButtonRef = useRef<HTMLButtonElement>(null)
+  const drawerRef = useRef<HTMLElement>(null)
+  const menuWasOpen = useRef(false)
   const superadmin = session?.role === 'superadmin'
   const title = tenantTitle(tenant)
   const shortLabel = tenantShortLabel(tenant)
@@ -50,8 +61,54 @@ export function Shell() {
     }
   }, [tenant.id, location.pathname, navigate])
 
+  useEffect(() => {
+    if (!open) {
+      if (menuWasOpen.current) {
+        menuWasOpen.current = false
+        menuButtonRef.current?.focus()
+      }
+      return
+    }
+
+    menuWasOpen.current = true
+    closeButtonRef.current?.focus()
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        setOpen(false)
+        return
+      }
+      if (event.key !== 'Tab') return
+      const drawer = drawerRef.current
+      if (!drawer) return
+      const items = tabbable(drawer)
+      if (items.length === 0) return
+      const first = items[0]
+      const last = items[items.length - 1]
+      const active = document.activeElement
+      if (event.shiftKey) {
+        if (active === first || !drawer.contains(active)) {
+          event.preventDefault()
+          last?.focus()
+        }
+        return
+      }
+      if (active === last || !drawer.contains(active)) {
+        event.preventDefault()
+        first?.focus()
+      }
+    }
+
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [open])
+
   return (
-    <div className="flex h-dvh overflow-hidden bg-paper text-ink">
+    <div className="relative flex h-dvh overflow-hidden bg-paper text-ink">
+      <a className="skip" href="#contenido">
+        Saltar al contenido
+      </a>
       {open ? (
         <button
           type="button"
@@ -62,14 +119,15 @@ export function Shell() {
       ) : null}
 
       <aside
+        ref={drawerRef}
         className={cn(
-          'fixed inset-y-0 left-0 z-40 flex w-[260px] flex-col bg-moss text-paper transition-transform lg:static lg:translate-x-0',
+          'sidebar fixed inset-y-0 left-0 z-40 flex w-[260px] flex-col bg-moss text-paper transition-transform lg:static lg:translate-x-0',
           open ? 'translate-x-0' : '-translate-x-full',
         )}
       >
         <div className="flex items-center justify-between px-5 py-5">
           <Logo light />
-          <button type="button" className="rounded-lg p-1 text-paper lg:hidden" onClick={() => setOpen(false)} aria-label="Cerrar">
+          <button ref={closeButtonRef} type="button" className="rounded-lg p-1 text-paper lg:hidden" onClick={() => setOpen(false)} aria-label="Cerrar">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -133,6 +191,7 @@ export function Shell() {
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex h-16 shrink-0 items-center gap-3 border-b border-line bg-card/80 px-3 backdrop-blur sm:px-5">
           <button
+            ref={menuButtonRef}
             type="button"
             className="grid h-10 w-10 place-items-center rounded-xl border border-line lg:hidden"
             onClick={() => setOpen(true)}
@@ -166,7 +225,7 @@ export function Shell() {
             </span>
           )}
         </header>
-        <main className="min-h-0 flex-1 overflow-hidden">
+        <main id="contenido" tabIndex={-1} className="min-h-0 flex-1 overflow-hidden">
           <Outlet />
         </main>
       </div>

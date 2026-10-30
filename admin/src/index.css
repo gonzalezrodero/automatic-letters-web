@@ -64,6 +64,28 @@ p {
   outline-offset: 2px;
 }
 
+/* Ivory on #0f766e is 5.28:1. The teal ring above disappears on the sidebar.
+   The login orange button stays on the teal ring. */
+.sidebar :focus-visible {
+  outline-color: #fffbeb;
+}
+
+.skip {
+  position: absolute;
+  left: 0.75rem;
+  top: 0.75rem;
+  z-index: 50;
+  transform: translateY(-150%);
+  background: #fffbeb;
+  color: #1c1917;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid #0f766e;
+}
+
+.skip:focus {
+  transform: none;
+}
+
 input,
 textarea,
 select {
