@@ -353,6 +353,11 @@ test('production login shows Cognito and the example conversation, not the demo 
   await expectNoHorizontalOverflow(page)
   await expectNoSeriousAxeViolations(page)
 
+  for (const width of [320, 768]) {
+    await page.setViewportSize({ width, height: 844 })
+    await expectNoHorizontalOverflow(page)
+  }
+
   assertClean(problems)
 })
 
