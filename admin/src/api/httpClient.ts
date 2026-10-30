@@ -45,7 +45,11 @@ export function createHttpAdminApi(baseUrl: string): AdminApi {
       throw publicApiError(response.status)
     }
     if (response.status === 204) return undefined as T
-    return (await response.json()) as T
+    try {
+      return (await response.json()) as T
+    } catch {
+      throw new Error('No hemos podido leer la respuesta. Vuelve a intentarlo.')
+    }
   }
 
   return {
