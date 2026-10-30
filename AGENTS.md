@@ -28,3 +28,11 @@ User-facing text is plain Spanish, without jargon. Write pull requests, commits,
 In `admin/`, run `npm test`, `npm run build`, and `npm run e2e`. `admin/src/theme.contrast.test.ts` and the Playwright smoke tests must pass.
 
 To check a UI change visually, use the `playwright-cli` skill in `.cursor/skills/playwright-cli/`. Run it without a global install: `npx --yes @playwright/cli@0.1.22`. Do not publish screenshots with `gh --attach`, connect to a real browser session, or use real credentials.
+
+## UI checks and vendored skills
+
+Before finishing any UI change, run the Playwright checks at widths 320, 768 and 1280 px: no horizontal overflow, no scroll on the login page at short heights, and no gap in the landing.
+
+Use the `a11y-wcag` skill for accessibility work (keyboard, focus, accessible names, landmarks, in addition to the existing axe checks). Use the `security-review` skill for security reviews (Cognito/OAuth login flow, XSS in React, Cloudflare Pages headers).
+
+Vendored skills are pinned copies and must not be updated automatically.
