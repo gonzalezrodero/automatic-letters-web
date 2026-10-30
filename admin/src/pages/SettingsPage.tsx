@@ -4,6 +4,8 @@ import { useAdmin } from '../auth/AdminContext'
 import { safeNavigationUrl } from '../lib/safeUrl'
 import { tenantShortLabel, tenantTitle } from '../lib/tenantLabel'
 
+const PRIVACY_URL_ERROR = 'El enlace de privacidad tiene que ser una dirección web segura (https).'
+
 export function SettingsPage() {
   const { api, tenant, replaceTenant } = useAdmin()
   const [prompt, setPrompt] = useState(tenant.systemPrompt)
@@ -23,13 +25,14 @@ export function SettingsPage() {
   }, [tenant.id])
 
   const dirty = prompt !== tenant.systemPrompt || url !== tenant.privacyPolicyUrl
+  const urlInvalid = error === PRIVACY_URL_ERROR
 
   async function save() {
     setError(null)
     setNotice(null)
     const privacyUrl = safeNavigationUrl(url)
     if (!privacyUrl) {
-      setError('El enlace de privacidad tiene que ser una dirección web segura (https).')
+      setError(PRIVACY_URL_ERROR)
       return
     }
     if (!prompt.trim()) {
@@ -95,6 +98,8 @@ export function SettingsPage() {
               }}
               className="w-full rounded-2xl border border-line bg-card px-4 py-3 outline-none focus:border-moss"
               inputMode="url"
+              aria-invalid={urlInvalid || undefined}
+              aria-describedby={urlInvalid ? 'privacy-url-error' : undefined}
             />
           </label>
 
@@ -103,7 +108,11 @@ export function SettingsPage() {
             <Field label="Referencia de WhatsApp" value={tenant.botPhoneNumberId} />
           </div>
 
-          {error ? <p className="mt-4 text-sm text-danger">{error}</p> : null}
+          {error ? (
+            <p id={urlInvalid ? 'privacy-url-error' : undefined} role="alert" className="mt-4 text-sm text-danger">
+              {error}
+            </p>
+          ) : null}
           {notice ? (
             <p className="fixed right-5 bottom-5 z-50 max-w-sm rounded-2xl bg-ink px-4 py-3 text-sm text-white shadow-lg" role="status">
               {notice}

@@ -59,7 +59,7 @@ export function TenantsPage() {
         {metricsMissing ? (
           <p className="mt-4 text-sm text-ink-soft">El resumen de cada organización todavía no está disponible.</p>
         ) : null}
-        {error ? <p className="mt-4 text-sm text-danger">{error}</p> : null}
+        {error ? <p role="alert" className="mt-4 text-sm text-danger">{error}</p> : null}
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           {(rows ?? tenants.map((item) => ({ tenant: item, stats: null as DashboardStats | null }))).map((row) => {
             const current = row.tenant.id === tenant.id

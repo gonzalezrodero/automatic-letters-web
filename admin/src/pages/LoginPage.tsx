@@ -190,7 +190,7 @@ export function LoginPage() {
           </form>
           ) : null}
 
-          {usingApi && error ? <p className="mt-6 text-sm text-danger">{error}</p> : null}
+          {usingApi && error ? <p role="alert" className="mt-6 text-sm text-danger">{error}</p> : null}
 
           {showDemoForm ? (
           <div className="my-5 flex items-center gap-3 text-sm text-ink-soft">

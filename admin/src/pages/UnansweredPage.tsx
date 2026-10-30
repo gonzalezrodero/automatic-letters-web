@@ -158,7 +158,7 @@ export function UnansweredPage() {
           Preguntas que el bot de {tenantShortLabel(tenant)} no pudo contestar con los documentos. Escribe la
           respuesta una vez y pasa al conocimiento. La próxima persona ya la recibe.
         </p>
-        {error ? <p className="mt-4 text-sm text-danger">{error}</p> : null}
+        {error ? <p role="alert" className="mt-4 text-sm text-danger">{error}</p> : null}
         {questions && questions.length === 0 ? (
           <p className="mt-8 text-sm text-ink-soft">No hay preguntas pendientes.</p>
         ) : null}
@@ -179,6 +179,7 @@ export function UnansweredPage() {
                     setDrafts((current) => ({ ...current, [question.id]: event.target.value }))
                   }
                   rows={3}
+                  aria-label={`Respuesta a: ${question.question}`}
                   className="mt-1 w-full rounded-2xl border border-line bg-paper px-3 py-2 text-sm text-ink outline-none"
                 />
               </label>

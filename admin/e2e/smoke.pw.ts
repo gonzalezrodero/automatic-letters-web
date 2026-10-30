@@ -463,6 +463,61 @@ test('authenticated pages load without console errors or failed requests', async
   assertClean(problems)
 })
 
+test('signed-in shell exposes the skip link, sidebar focus, menu, and errors', async ({ page }) => {
+  const problems = watch(page)
+  await installApi(page, problems, 'admin')
+  await page.setViewportSize({ width: 1280, height: 800 })
+  await page.goto('/admin/')
+  await expect(page.getByRole('heading', { level: 1, name: 'Hola, Ada' })).toBeVisible()
+
+  const skip = page.getByRole('link', { name: 'Saltar al contenido' })
+  await page.keyboard.press('Tab')
+  await expect(skip).toBeFocused()
+
+  await page.keyboard.press('Tab')
+  await page.keyboard.press('Tab')
+  const sectionLink = page.getByRole('navigation', { name: 'Secciones' }).getByRole('link', { name: 'Conversaciones' })
+  await expect(sectionLink).toBeFocused()
+  const ring = await sectionLink.evaluate((el) => {
+    const link = getComputedStyle(el)
+    const aside = el.closest('aside')
+    return {
+      outline: link.outlineColor,
+      style: link.outlineStyle,
+      background: aside ? getComputedStyle(aside).backgroundColor : '',
+    }
+  })
+  expect(ring.style).toBe('solid')
+  expect(ring.outline).not.toBe(ring.background)
+
+  await page.keyboard.press('Shift+Tab')
+  await page.keyboard.press('Shift+Tab')
+  await expect(skip).toBeFocused()
+  await page.keyboard.press('Enter')
+  await expect(page.locator('main#contenido')).toBeFocused()
+
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.getByRole('button', { name: 'Abrir menú' }).click()
+  await expect(page.getByRole('button', { name: 'Cerrar', exact: true })).toBeFocused()
+  await page.keyboard.press('Tab')
+  const insideDrawer = await page.evaluate(() => document.querySelector('aside')?.contains(document.activeElement) ?? false)
+  expect(insideDrawer).toBe(true)
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('button', { name: 'Abrir menú' })).toBeFocused()
+
+  await page.setViewportSize({ width: 1280, height: 800 })
+  await page.getByRole('navigation', { name: 'Secciones' }).getByRole('link', { name: 'Ajustes del bot' }).click()
+  const privacyUrl = page.getByRole('textbox', { name: 'URL de la política de privacidad' })
+  await privacyUrl.fill('http://example.com/privacy')
+  await page.getByRole('button', { name: 'Guardar' }).click()
+  const alert = page.getByRole('alert')
+  await expect(alert).toBeVisible()
+  await expect(privacyUrl).toHaveAttribute('aria-invalid', 'true')
+  await expect(privacyUrl).toHaveAttribute('aria-describedby', 'privacy-url-error')
+
+  assertClean(problems)
+})
+
 test('landing page has no serious or critical accessibility violations', async ({ page }) => {
   const problems = watch(page)
   await installLanding(page, problems)

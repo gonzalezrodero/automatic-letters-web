@@ -145,7 +145,7 @@ export function ConversationsPage() {
           </div>
         </div>
         <div className="min-h-0 flex-1 overflow-auto">
-          {error ? <p className="px-4 py-6 text-sm text-danger">{error}</p> : null}
+          {error ? <p role="alert" className="px-4 py-6 text-sm text-danger">{error}</p> : null}
           {rows && rows.length === 0 ? (
             <p className="px-4 py-10 text-sm text-ink-soft">Ninguna conversación con estos filtros.</p>
           ) : null}

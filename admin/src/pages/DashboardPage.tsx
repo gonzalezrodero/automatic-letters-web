@@ -61,7 +61,7 @@ export function DashboardPage() {
           </div>
         </div>
 
-        {error ? <p className="mt-6 text-sm text-danger">{error}</p> : null}
+        {error ? <p role="alert" className="mt-6 text-sm text-danger">{error}</p> : null}
 
         <section className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <Stat
@@ -100,7 +100,10 @@ export function DashboardPage() {
                   <span className="h-2 w-2 rounded-full bg-moss" /> Recibidos
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-[#1f6f8a]" /> Respuestas
+                  <svg width="16" height="8" aria-hidden="true" className="shrink-0">
+                    <line x1="0" y1="4" x2="16" y2="4" stroke="#1f6f8a" strokeWidth="2.4" strokeDasharray="4 3" />
+                  </svg>
+                  Respuestas
                 </span>
               </p>
             </div>
