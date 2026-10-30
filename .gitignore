@@ -3,4 +3,7 @@ admin/dist
 admin/.env
 admin/.env.local
 admin/.env.*.local
+admin/playwright-report/
+admin/test-results/
+admin/blob-report/
 *.tsbuildinfo

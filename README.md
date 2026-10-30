@@ -170,3 +170,15 @@ Local `npm run dev` already points at the development API through [`admin/.env.d
 cd admin
 npm test
 ```
+
+### End-to-end smoke tests
+
+Chromium only, against `vite preview`. The suite mocks `https://api.example.invalid` and does not call Cognito.
+
+```bash
+cd admin
+npm install
+npx playwright install chromium
+VITE_API_BASE=https://api.example.invalid VITE_COGNITO_DOMAIN=auth.example.invalid VITE_COGNITO_CLIENT_ID=ci-client npm run build
+npm run e2e
+```
