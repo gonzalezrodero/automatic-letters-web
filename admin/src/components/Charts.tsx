@@ -23,13 +23,14 @@ export function ActivityChart({ days }: { days: DayActivity[] }) {
 
   return (
     <svg viewBox={`0 0 ${width} ${height}`} className="h-56 w-full" role="img" aria-label="Mensajes de los últimos 14 días">
+      {/* Axis labels use ink-soft (#3d4f4a). #7b8b82 was about 3.6:1 on the card. */}
       {grid.map((step) => {
         const gy = pad.t + innerH - step * innerH
         const value = Math.round(step * max)
         return (
           <g key={step}>
             <line x1={pad.l} x2={width - pad.r} y1={gy} y2={gy} stroke="#eadfcd" strokeWidth="1" />
-            <text x={pad.l - 8} y={gy + 4} textAnchor="end" fontSize="11" fill="#7b8b82">
+            <text x={pad.l - 8} y={gy + 4} textAnchor="end" fontSize="11" fill="#3d4f4a">
               {value}
             </text>
           </g>
@@ -40,7 +41,7 @@ export function ActivityChart({ days }: { days: DayActivity[] }) {
       <path d={path('replied')} fill="none" stroke="#1f6f8a" strokeWidth="2.4" strokeLinejoin="round" strokeLinecap="round" />
       {days.map((day, index) =>
         index % 2 === 0 ? (
-          <text key={day.date} x={x(index)} y={height - 8} textAnchor="middle" fontSize="11" fill="#7b8b82">
+          <text key={day.date} x={x(index)} y={height - 8} textAnchor="middle" fontSize="11" fill="#3d4f4a">
             {day.label}
           </text>
         ) : null,

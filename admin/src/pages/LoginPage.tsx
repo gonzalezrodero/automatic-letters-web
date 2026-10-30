@@ -91,10 +91,13 @@ export function LoginPage() {
 
   return (
     <div className="grid min-h-dvh lg:grid-cols-[1.05fr_0.95fr]">
-      <section className="relative hidden bg-moss text-paper lg:flex lg:min-h-dvh lg:flex-col lg:px-12 lg:pt-8 xl:px-14 xl:pt-12">
+      <section
+        className="relative hidden bg-moss text-paper lg:flex lg:min-h-dvh lg:flex-col lg:px-12 lg:pt-8 xl:px-14 xl:pt-12"
+        aria-labelledby="login-intro"
+      >
         <Logo light />
         <div className="mt-6 max-w-lg xl:mt-12">
-          <p className="font-display text-4xl leading-tight font-bold">
+          <p id="login-intro" className="font-display text-4xl leading-tight font-bold">
             Las conversaciones y los documentos de tu negocio.
           </p>
           <p className="mt-3 text-lg leading-relaxed xl:mt-5">
@@ -141,7 +144,7 @@ export function LoginPage() {
         </aside>
       </section>
 
-      <section className="flex items-center justify-center px-5 py-10">
+      <main className="flex items-center justify-center px-5 py-10">
         <div className="w-full max-w-md">
           <div className="mb-8 lg:hidden">
             <Logo />
@@ -251,7 +254,7 @@ export function LoginPage() {
             </a>
           </p>
         </div>
-      </section>
+      </main>
     </div>
   )
 }
