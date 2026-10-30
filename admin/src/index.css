@@ -104,3 +104,79 @@ select {
 .bubble-out {
   border-radius: 18px 18px 5px 18px;
 }
+
+/* Login stays inside the viewport. Vertical rhythm lives here so a short
+   laptop can tighten it without fighting the xl: utilities.
+   The dev-only demo form is the only <form>; that screen may grow. */
+@media (min-width: 64rem) {
+  .login-screen:not(:has(form)) {
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden;
+  }
+
+  .login-screen:not(:has(form)) > .login-story,
+  .login-screen:not(:has(form)) > .login-panel {
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .login-story {
+    flex-direction: column;
+    padding-top: 2rem;
+  }
+
+  .login-intro {
+    margin-top: 1.5rem;
+  }
+
+  .login-lede {
+    margin-top: 0.75rem;
+  }
+
+  .login-aside {
+    margin-top: 1.5rem;
+  }
+
+  .login-bar {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .login-chat {
+    gap: 0.625rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+}
+
+@media (min-width: 80rem) {
+  .login-story { padding-top: 3rem; }
+  .login-intro { margin-top: 3rem; }
+  .login-lede { margin-top: 1.25rem; }
+  .login-aside { margin-top: 2.5rem; }
+  .login-bar { padding-top: 0.875rem; padding-bottom: 0.875rem; }
+  .login-chat { gap: 1rem; padding-top: 1.5rem; padding-bottom: 1.5rem; }
+}
+
+@media (min-width: 64rem) and (max-height: 860px) {
+  .login-story { padding-top: 1.25rem; }
+  .login-intro { margin-top: 1rem; }
+  .login-lede { margin-top: 0.5rem; }
+  .login-aside { margin-top: 0.75rem; }
+  .login-bar { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+  .login-chat { gap: 0.5rem; padding-top: 0.75rem; padding-bottom: 0.75rem; }
+
+  .login-chat .bubble-in,
+  .login-chat .bubble-out {
+    padding: 0.45rem 0.7rem;
+    font-size: 0.95rem;
+    line-height: 1.35;
+  }
+}
+
+@media (max-height: 680px) {
+  .login-more { display: none; }
+}

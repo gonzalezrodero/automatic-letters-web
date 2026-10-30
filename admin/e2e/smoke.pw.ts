@@ -270,6 +270,37 @@ async function expectNoHorizontalOverflow(page: Page) {
   expect(overflow, 'horizontal overflow in pixels').toBeLessThanOrEqual(0)
 }
 
+async function expectNoDocumentScroll(page: Page) {
+  const extra = await page.evaluate(
+    () => document.documentElement.scrollHeight - window.innerHeight,
+  )
+  expect(extra, 'document scroll in pixels').toBeLessThanOrEqual(0)
+}
+
+async function expectNoPanelScroll(page: Page) {
+  const extra = await page.evaluate(() => {
+    const selectors = ['.login-story', '.login-aside', '.login-chat', '.login-panel']
+    const extras = selectors.map((selector) => {
+      const el = document.querySelector(selector)
+      if (!el || getComputedStyle(el).display === 'none') return 0
+      return el.scrollHeight - el.clientHeight
+    })
+    return Math.max(0, ...extras)
+  })
+  expect(extra, 'panel scroll in pixels').toBeLessThanOrEqual(0)
+}
+
+const loginViewports = [
+  { width: 1280, height: 600 },
+  { width: 1366, height: 650 },
+  { width: 1440, height: 700 },
+  { width: 1440, height: 900 },
+  { width: 1920, height: 1080 },
+] as const
+
+/** Public site, served beside the portal preview. See playwright.config.ts. */
+const SITE_ORIGIN = 'http://127.0.0.1:4174'
+
 test('production login shows Cognito and the example conversation, not the demo form', async ({ page }) => {
   const problems = watch(page)
   await installApi(page, problems, 'anonymous')
@@ -288,19 +319,103 @@ test('production login shows Cognito and the example conversation, not the demo 
   await expect(example).toBeVisible()
   await expect(example.getByText('El Mostrador')).toBeVisible()
   await expect(example.getByText('¿A qué hora abrís?')).toBeVisible()
+  await expect(example.getByText('¿Dónde estáis?')).toBeVisible()
   await expect(page).toHaveURL(/\/admin\/login$/)
   await expectNoHorizontalOverflow(page)
   await expectNoSeriousAxeViolations(page)
 
+  for (const viewport of loginViewports) {
+    await page.setViewportSize(viewport)
+    await expect(page.getByRole('heading', { name: 'Entra al portal' })).toBeVisible()
+    const button = page.getByRole('button', { name: 'Entrar con mi cuenta' })
+    await expect(button).toBeVisible()
+    await expect(button).toBeInViewport({ ratio: 1 })
+    await expect(example.getByText('¿A qué hora abrís?')).toBeInViewport({ ratio: 1 })
+    await expect(example.getByText(/Los domingos cerramos/)).toBeInViewport({ ratio: 1 })
+    if (viewport.height > 680) {
+      await expect(example.getByText('¿Dónde estáis?')).toBeInViewport({ ratio: 1 })
+      await expect(
+        example.getByText('Estamos en la calle Mayor, número 12. El autobús para en la puerta.'),
+      ).toBeInViewport({ ratio: 1 })
+    }
+    await expectNoDocumentScroll(page)
+    await expectNoPanelScroll(page)
+    await expectNoHorizontalOverflow(page)
+  }
+
   await page.setViewportSize({ width: 390, height: 844 })
   await expect(page.getByRole('heading', { name: 'Entra al portal' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Entrar con mi cuenta' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Entrar con mi cuenta' })).toBeInViewport({ ratio: 1 })
   await expect(page.locator('input[type="email"]')).toHaveCount(0)
   await expect(page.locator('input[type="password"]')).toHaveCount(0)
+  await expectNoDocumentScroll(page)
   await expectNoHorizontalOverflow(page)
   await expectNoSeriousAxeViolations(page)
 
   assertClean(problems)
+})
+
+test('landing keeps the example beside the hero without a large gap', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto(`${SITE_ORIGIN}/`)
+  await page.evaluate(() => document.fonts.ready)
+  await expect(page.getByRole('heading', { name: 'Las preguntas de siempre, contestadas en WhatsApp.' })).toBeVisible()
+
+  // The broken layout left about 229px under the hero. Section rhythm is 4.25rem.
+  const gapLimit = 120
+  const desktop = await page.evaluate(() => {
+    const hero = document.querySelector('.hero-copy')
+    const ejemplo = document.getElementById('ejemplo')
+    const next = document.getElementById('sirve-titulo')?.closest('section')
+    if (!hero || !ejemplo || !next) return null
+    const heroBox = hero.getBoundingClientRect()
+    const ejemploBox = ejemplo.getBoundingClientRect()
+    const nextBox = next.getBoundingClientRect()
+    const root = document.documentElement
+    const width = Math.max(root.scrollWidth, document.body?.scrollWidth ?? 0)
+    return {
+      gap: nextBox.top - heroBox.bottom,
+      ejemploTop: ejemploBox.top,
+      heroTop: heroBox.top,
+      ejemploLeft: ejemploBox.left,
+      heroRight: heroBox.right,
+      ejemploBottom: ejemploBox.bottom,
+      nextTop: nextBox.top,
+      overflow: width - root.clientWidth,
+    }
+  })
+  expect(desktop).not.toBeNull()
+  expect(desktop!.overflow, 'horizontal overflow in pixels').toBeLessThanOrEqual(0)
+  expect(desktop!.gap, 'gap under the hero in pixels').toBeLessThanOrEqual(gapLimit)
+  expect(Math.abs(desktop!.ejemploTop - desktop!.heroTop)).toBeLessThanOrEqual(8)
+  expect(desktop!.ejemploLeft).toBeGreaterThan(desktop!.heroRight)
+  expect(desktop!.ejemploBottom).toBeGreaterThan(desktop!.nextTop)
+
+  await page.evaluate(() => window.scrollTo(0, 480))
+  const stuck = await page.evaluate(() => {
+    const box = document.getElementById('ejemplo')!.getBoundingClientRect()
+    return { top: box.top, left: box.left }
+  })
+  expect(stuck.top, 'example stays on screen while the page scrolls').toBeGreaterThan(0)
+  expect(stuck.top).toBeLessThan(40)
+  expect(stuck.left).toBeGreaterThan(desktop!.heroRight)
+
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.evaluate(() => window.scrollTo(0, 0))
+  const mobile = await page.evaluate(() => {
+    const hero = document.querySelector('.hero-copy')!.getBoundingClientRect()
+    const ejemplo = document.getElementById('ejemplo')!.getBoundingClientRect()
+    const next = document.getElementById('sirve-titulo')!.closest('section')!.getBoundingClientRect()
+    const root = document.documentElement
+    const width = Math.max(root.scrollWidth, document.body?.scrollWidth ?? 0)
+    return {
+      stacked: ejemplo.top >= hero.bottom - 1 && next.top >= ejemplo.bottom - 1,
+      overflow: width - root.clientWidth,
+    }
+  })
+  expect(mobile.stacked, 'mobile keeps a single column with the example after the hero').toBe(true)
+  expect(mobile.overflow, 'horizontal overflow in pixels').toBeLessThanOrEqual(0)
 })
 
 test('authenticated pages load without console errors or failed requests', async ({ page }) => {
