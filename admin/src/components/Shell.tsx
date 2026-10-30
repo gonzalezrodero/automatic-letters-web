@@ -109,7 +109,7 @@ export function Shell() {
 
         <div className="border-t border-white/10 p-4">
           <div className="flex items-center gap-3">
-            <span className="grid h-9 w-9 place-items-center rounded-full bg-white/15 text-xs font-semibold">
+            <span className="grid h-9 w-9 place-items-center rounded-full bg-moss-deep text-xs font-semibold text-paper">
               {initials(session?.name ?? '')}
             </span>
             <div className="min-w-0">
