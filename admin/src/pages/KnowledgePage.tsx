@@ -107,7 +107,7 @@ export function KnowledgePage() {
             event.target.value = ''
           }}
         />
-        {error ? <p className="mt-3 text-sm text-danger">{error}</p> : null}
+        {error ? <p role="alert" className="mt-3 text-sm text-danger">{error}</p> : null}
 
         <ul className="mt-6 divide-y divide-line overflow-hidden rounded-3xl border border-line bg-card">
           {documents?.map((document) => (
