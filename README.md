@@ -185,7 +185,7 @@ npm run e2e
 
 ## Squad in Cursor
 
-This repo carries a Squad team for local use in Cursor. The roster, routing, and standing decisions are in `.squad/`. Squad stays a local CLI, outside `package.json`. Host files from `squad init --client cursor` are `.cursor/agents/squad.md`, `.cursor/rules/squad.mdc` (`alwaysApply: false`), and `.cursor/mcp.json`.
+This repo carries a Squad team for local use in Cursor. The roster, routing, and standing decisions are in `.squad/`. Squad stays a local CLI, outside `package.json`. Host files kept for Cursor are `.cursor/agents/squad.md`, `.cursor/rules/squad.mdc` (`alwaysApply: false`), and `.cursor/mcp.json`. The Copilot projection (`.github/agents/`, `.github/skills/`, `.mcp.json`, `.copilot/`) and `.squad/templates/`, including its workflow templates, were removed on purpose. Cursor reads `.cursor/mcp.json`, and the coordinator protocol is already in `.cursor/agents/squad.md`. `squad health` does not use those removed paths. `squad doctor` still looks for `.github/agents/squad.agent.md` and `.mcp.json`, which are Copilot-only.
 
 1. Open this repository in Cursor and select the `squad` agent.
 2. Approve the state server once: `cursor-agent mcp enable squad_state`.
