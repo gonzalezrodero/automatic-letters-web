@@ -36,3 +36,7 @@ Before finishing any UI change, run the Playwright checks at widths 320, 768 and
 Use the `a11y-wcag` skill for accessibility work (keyboard, focus, accessible names, landmarks, in addition to the existing axe checks). Use the `security-review` skill for security reviews (Cognito/OAuth login flow, XSS in React, Cloudflare Pages headers).
 
 Vendored skills are pinned copies and must not be updated automatically.
+
+## Squad
+
+A local Squad team for Cursor lives in `.squad/`. Select the `squad` agent. Standing decisions are in `.squad/decisions.md`. The README explains the one-time `squad_state` approval and the Cursor host limits. Follow this file together with those decisions.
