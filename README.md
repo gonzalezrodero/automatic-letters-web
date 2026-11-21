@@ -182,3 +182,14 @@ npx playwright install chromium
 VITE_API_BASE=https://api.example.invalid VITE_COGNITO_DOMAIN=auth.example.invalid VITE_COGNITO_CLIENT_ID=ci-client npm run build
 npm run e2e
 ```
+
+## Squad in Cursor
+
+This repo carries a Squad team for local use in Cursor. The roster, routing, and standing decisions are in `.squad/`. Squad stays a local CLI, outside `package.json`. Host files from `squad init --client cursor` are `.cursor/agents/squad.md`, `.cursor/rules/squad.mdc` (`alwaysApply: false`), and `.cursor/mcp.json`.
+
+1. Open this repository in Cursor and select the `squad` agent.
+2. Approve the state server once: `cursor-agent mcp enable squad_state`.
+
+Lead reviews. Frontend owns the landing site (www.core-webhook.eu) and the admin portal (admin.core-webhook.eu, Cognito). Tester owns Vitest, the Playwright smoke tests, and axe. Scribe, Ralph, Rai, and Fact Checker are Squad's built-in support agents. Auto model selection uses the economy profile in `.squad/config.json`.
+
+Squad 2.0's host matrix gives Cursor these capability tokens: approvals, cancel-run, cursor-reconnect, mcp-bridge, subagents, and typed-content-parts, plus the steering-files projection. Transports are `mcp-bridge` and `http-backend`. `background-runs`, `native-hooks`, and the in-process transport are declared for Copilot and are absent here, so Scribe runs in the same turn and Cursor has no Squad governance hooks. The coordinator inlines each charter into a subagent, or adopts the charter in the current turn when subagents are unavailable. `.cursor/agents/squad.md` sets `model: inherit`, so the chat uses the session model. The economy profile is Squad's selection rule. Per-spawn model switching belongs to the Copilot CLI.
