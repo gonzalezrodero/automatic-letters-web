@@ -48,7 +48,12 @@ export async function exchangeAuthorizationCode(input: {
     throw publicApiError(response.status)
   }
 
-  const body = (await response.json()) as TokenBody
+  let body: TokenBody
+  try {
+    body = (await response.json()) as TokenBody
+  } catch {
+    throw new Error('No hemos podido iniciar tu sesión. Vuelve a entrar desde la pantalla de acceso.')
+  }
   if (typeof body.email !== 'string' || !Array.isArray(body.groups)) {
     throw new Error('No hemos podido iniciar tu sesión. Vuelve a entrar desde la pantalla de acceso.')
   }

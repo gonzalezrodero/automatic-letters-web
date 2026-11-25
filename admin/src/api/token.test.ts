@@ -55,4 +55,32 @@ describe('exchangeAuthorizationCode', () => {
     expect(JSON.stringify(spy.mock.calls)).not.toContain('secret stack trace')
     spy.mockRestore()
   })
+
+  it('rejects a non-JSON success body without surfacing the parser error', async () => {
+    const fetchImpl = vi.fn(
+      async () =>
+        new Response('<html>oops</html>', { status: 200, headers: { 'Content-Type': 'text/html' } }),
+    )
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const error = await exchangeAuthorizationCode({
+      apiBase: 'https://api.core-webhook.eu',
+      code: 'code-1',
+      codeVerifier: 'verifier-1',
+      redirectUri: 'https://admin.core-webhook.eu/auth/callback',
+      fetchImpl: fetchImpl as typeof fetch,
+    }).catch((caught: unknown) => caught)
+    const logged = spy.mock.calls
+      .flat()
+      .map((arg) => (arg instanceof Error ? `${arg.name} ${arg.message}` : String(arg)))
+      .join('\n')
+    spy.mockRestore()
+
+    expect(error).toBeInstanceOf(Error)
+    const message = (error as Error).message
+    expect(message).toBe('No hemos podido iniciar tu sesión. Vuelve a entrar desde la pantalla de acceso.')
+    for (const leak of ['Unexpected token', 'JSON', '<html>']) {
+      expect(message).not.toContain(leak)
+      expect(logged).not.toContain(leak)
+    }
+  })
 })
