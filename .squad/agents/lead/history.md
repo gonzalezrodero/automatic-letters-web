@@ -46,4 +46,4 @@ E2E mocks the API and does not call Cognito. No real credentials. Vendored skill
 - `style-src-attr 'unsafe-inline'` is for chart element styles. It is not permission for inline scripts.
 - Cookie mode stores no token. `sessionStorage` holds the PKCE pair and, in mock mode only, the display session. `setBearerToken` exists; the Cognito callback does not use it.
 - Resource ids are one segment `^[a-z0-9-]+$`, then URL-encoded. The portal will not request `..`.
-- Panel, conversaciones, and documentos are not on the live API. With `VITE_API_BASE` set, those screens must not call the missing paths. The mock still fills them when the base is empty.
+- Panel, conversaciones, documentos, and sin respuesta call the live API through `httpClient.ts` (since bc5ef53). The API side is `Features/Portal/PortalEndpoints.cs` in the API repo. The mock answers the same calls when the base is empty. `NotReady` and `UnavailableApiError` are still wired but nothing throws them, so do not treat that screen as live behavior. Removing them is a separate change.
