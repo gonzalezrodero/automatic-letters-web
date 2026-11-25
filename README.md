@@ -185,10 +185,10 @@ npm run e2e
 
 ## Squad in Cursor
 
-This repo carries a Squad team for local use in Cursor. The roster, routing, and standing decisions are in `.squad/`. Squad stays a local CLI, outside `package.json`. Host files kept for Cursor are `.cursor/agents/squad.md`, `.cursor/rules/squad.mdc` (`alwaysApply: false`), and `.cursor/mcp.json`. The Copilot projection (`.github/agents/`, `.github/skills/`, `.mcp.json`, `.copilot/`) and `.squad/templates/`, including its workflow templates, were removed on purpose. Cursor reads `.cursor/mcp.json`, and the coordinator protocol is already in `.cursor/agents/squad.md`. `squad health` does not use those removed paths. `squad doctor` still looks for `.github/agents/squad.agent.md` and `.mcp.json`, which are Copilot-only.
+This repo carries a Squad team for local use in Cursor. The roster, routing, and standing decisions are in `.squad/`. Squad stays a local CLI, outside `package.json`. Host files kept for Cursor are `.cursor/agents/squad.md`, `.cursor/rules/squad.mdc` (`alwaysApply: true`, so the squad loads on every turn in this repo), and `.cursor/mcp.json`. The Copilot projection (`.github/agents/`, `.github/skills/`, `.mcp.json`, `.copilot/`) and `.squad/templates/`, including its workflow templates, were removed on purpose. Cursor reads `.cursor/mcp.json`, and the coordinator protocol is already in `.cursor/agents/squad.md`. `squad health` does not use those removed paths. `squad doctor` still looks for `.github/agents/squad.agent.md` and `.mcp.json`, which are Copilot-only.
 
 1. Open this repository in Cursor and select the `squad` agent.
-2. Approve the state server once: `cursor-agent mcp enable squad_state`.
+2. Approve the state server once: `cursor-agent mcp enable squad_state_web`. The server name is `squad_state_web` so it can run beside the API repo's `squad_state`.
 
 Lead reviews. Frontend owns the landing site (www.core-webhook.eu) and the admin portal (admin.core-webhook.eu, Cognito). Tester owns Vitest, the Playwright smoke tests, and axe. Scribe, Ralph, Rai, and Fact Checker are Squad's built-in support agents. Auto model selection uses the economy profile in `.squad/config.json`.
 

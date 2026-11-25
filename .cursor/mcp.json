@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "squad_state": {
+    "squad_state_web": {
       "env": {},
       "command": "npx",
       "args": [
