@@ -53,7 +53,7 @@ cd admin
 npm run build
 ```
 
-Output is static files in `admin/dist`, with asset paths prefixed by `/admin/` (override with `VITE_BASE`). Preview the production build:
+Output is static files in `admin/dist`. Without `VITE_BASE`, asset paths are prefixed by `/admin/`, which `npm run preview` and the smoke tests use. The Cloudflare Pages deploy sets `VITE_BASE=/`. Preview the production build:
 
 ```bash
 npm run preview
@@ -63,7 +63,7 @@ Then open [http://localhost:4173/admin/](http://localhost:4173/admin/).
 
 ### Deploy
 
-Recommended host: **Cloudflare Pages** at `admin.core-webhook.eu`, as its own project. Do not publish this app by copying a build over the marketing site.
+Host: **Cloudflare Pages** at `admin.core-webhook.eu`, as its own project built from `admin/`. GitHub Pages publishes only the repository-root landing. Do not copy `admin/dist`, `public/_redirects`, or `public/_headers` onto the marketing site.
 
 A production build fails unless `VITE_API_BASE`, `VITE_COGNITO_DOMAIN`, and `VITE_COGNITO_CLIENT_ID` are set. `.env.development` is only read by `npm run dev`. Set the same three variables on Cloudflare Pages. Without them the build stops, so a published bundle cannot fall back to the demo password.
 
@@ -78,20 +78,13 @@ VITE_API_BASE=https://api.example VITE_COGNITO_DOMAIN=auth.example VITE_COGNITO_
 - SPA fallback: `public/_redirects` (`/* /index.html 200`), copied into `dist`
 - Headers: `public/_headers`, also copied into `dist`
 
-`_headers` sends a Content-Security-Policy that matches this app: scripts, styles, and fonts from `'self'` (Familjen Grotesk is bundled with the build; there is no Google Fonts request), `style-src-attr 'unsafe-inline'` because the charts set `style` on elements, `connect-src` for `https://api.core-webhook.eu` and `https://api.dev.core-webhook.eu`, and `frame-ancestors 'none'`. `frame-ancestors` only works as an HTTP header, which is why this deploy is preferred over GitHub Pages. If the API origin changes, edit `connect-src` in `admin/public/_headers`.
+`_headers` sends a Content-Security-Policy that matches this app: scripts, styles, and fonts from `'self'` (Familjen Grotesk is bundled with the build; there is no Google Fonts request), `style-src-attr 'unsafe-inline'` because the charts set `style` on elements, `connect-src` for `https://api.core-webhook.eu` and `https://api.dev.core-webhook.eu`, and `frame-ancestors 'none'`. `frame-ancestors` only works as an HTTP header, which is why the portal is not on GitHub Pages. If the API origin changes, edit `connect-src` in `admin/public/_headers`.
 
 Cognito redirect URI: `https://admin.core-webhook.eu/auth/callback`. Logout URI: `https://admin.core-webhook.eu/login`.
 
 The build does not emit `dist/404.html`. Cloudflare Pages would serve that file for `/auth/callback` and `/login` with HTTP 404, which breaks Cognito. `public/_redirects` (`/* /index.html 200`) is the SPA fallback and returns 200.
 
-**Subfolder** (`www.core-webhook.eu/admin/`), only if you cannot use the subdomain:
-
-1. `cd admin && npm run build` (default `VITE_BASE=/admin/`).
-2. Publish the **contents** of `admin/dist` at the `/admin/` path.
-3. Never replace the repository-root `index.html`, `privacy.html`, `data-deletion.html`, or `CNAME`. Those files are the public site. Do not copy `dist/index.html` onto them.
-4. Add a fallback so `/admin/*` serves `/admin/index.html` with HTTP 200. Do not use a 404 document for that rewrite.
-
-GitHub Pages serving the branch root will show the Vite **source** `admin/index.html`, which does not run. It also cannot set the CSP above. Publish `admin/dist` on a host that can, not the source tree.
+GitHub Pages serving the branch root shows the Vite **source** `admin/index.html`, which does not run, and it cannot send the CSP above. Never copy `dist/index.html` over the repository-root `index.html`, `privacy.html`, `data-deletion.html`, or `CNAME`.
 
 ### Cognito
 
@@ -122,8 +115,18 @@ Base URL: `VITE_API_BASE`. Paths are defined in [`admin/src/api/endpoints.ts`](a
 | `GET` | `/tenants` | — | `TenantProfile[]` |
 | `GET` | `/tenants/{tenantId}` | — | `TenantProfile` |
 | `PATCH` | `/tenants/{tenantId}` | `{ systemPrompt, privacyPolicyUrl }` | updated `TenantProfile` |
-
-Panel, conversaciones and documentos are not on the API. With `VITE_API_BASE` set, those screens say so and do not call the missing paths. The mock client still fills them when the variable is empty. The path helpers in `endpoints.ts` stay for that later contract.
+| `GET` | `/tenants/{tenantId}/dashboard` | — | `DashboardStats` |
+| `GET` | `/tenants/{tenantId}/conversations` | query `q`, `from`, `to`, `includeAnonymized` (always sent as `true` or `false`) | `Conversation[]` |
+| `GET` | `/tenants/{tenantId}/conversations/{conversationId}` | — | `Conversation` |
+| `GET` | `/tenants/{tenantId}/documents` | — | `KnowledgeDocument[]` |
+| `POST` | `/tenants/{tenantId}/documents` | multipart form, field `file` | `201` with `KnowledgeDocument` |
+| `DELETE` | `/tenants/{tenantId}/documents/{documentId}` | — | `204` |
+| `GET` | `/tenants/{tenantId}/unanswered` | — | `UnansweredQuestion[]` |
+| `GET` | `/tenants/{tenantId}/unanswered/answered` | — | `AnsweredQuestion[]` |
+| `POST` | `/tenants/{tenantId}/unanswered/{questionId}` | `{ answer }` | Saves the answer. The portal ignores the body. |
+| `POST` | `/tenants/{tenantId}/unanswered/{questionId}/revision` | `{ answer }` | Revises a saved answer. The portal ignores the body. |
+| `DELETE` | `/tenants/{tenantId}/unanswered/{questionId}` | — | `204` |
+| `DELETE` | `/tenants/{tenantId}/unanswered/{questionId}/discard` | — | `204` |
 
 Shapes the UI already expects:
 
